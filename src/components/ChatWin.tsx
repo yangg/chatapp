@@ -29,7 +29,7 @@ function ChatWin() {
   }, [selectedConversation, personInfo]);
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full w-full bg-white">
       <ConversationList
         onSelect={handleConversationSelect}
       />

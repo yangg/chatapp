@@ -1,11 +1,24 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, Root } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-createRoot(document.getElementById('root')!).render(
-  // <StrictMode>
+let appRoot: Root
+
+export function render(root: HTMLElement) {
+  appRoot = createRoot(root)
+  appRoot.render(
+    // <StrictMode>
     <App />
-  // </StrictMode>
-  ,
-)
+    // </StrictMode>
+  )
+}
+
+export function unmount() {
+  appRoot.unmount()
+}
+
+
+if (import.meta.env.MODE === 'development' || import.meta.env.BASE_URL !== '/') {
+  render(document.getElementById('root')!)
+}
