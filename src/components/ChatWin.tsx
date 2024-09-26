@@ -1,17 +1,18 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import ConversationList from './ConversationList.tsx';
 import PersonInfo from './PersonInfo.tsx';
 import ChatTabs from './ChatTabs.tsx';
+import {Conversation} from "@/types/Conversation.ts";
 
 // ... existing code ...
 
 function ChatWin() {
-  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
-  const handleConversationSelect = (id) => {
-    setSelectedConversation(id);
+  const handleConversationSelect = (conv: Conversation) => {
+    setSelectedConversation(conv);
     // Here you would typically load the messages for the selected conversation
-    console.log(`Selected conversation: ${id}`);
+    console.log(`Selected conversation: `, conv);
   };
 
   const [personInfo] = useState({
@@ -34,7 +35,7 @@ function ChatWin() {
       />
 
       <ChatTabs
-        selectedConversation={selectedConversation}
+        conversation={selectedConversation}
       />
 
       <PersonInfo

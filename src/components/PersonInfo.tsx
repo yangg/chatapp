@@ -1,6 +1,7 @@
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
-import { Phone, Mail } from 'react-feather';
+import { Phone, Mail } from 'lucide-react';
+import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
 
 const PersonInfo = ({ personInfo }) => {
   const getNameInitials = (name) => {
@@ -17,10 +18,12 @@ const PersonInfo = ({ personInfo }) => {
 
   return (
     <div className="w-1/5 p-4 border-l border-gray-200">
-      <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mx-auto mb-2">
-        <span className="text-xl font-semibold text-white">{nameInitials}</span>
+      <div className="flex flex-col items-center">
+        <Avatar className="size-20">
+          <AvatarFallback className="bg-primary text-white text-xl">{nameInitials}</AvatarFallback>
+        </Avatar>
+        <p className="mt-2 font-medium">{personInfo.name}</p>
       </div>
-      <p className="text-center font-medium">{personInfo.name}</p>
 
       <Separator className="my-3" />
 
