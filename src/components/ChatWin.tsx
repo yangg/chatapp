@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import {useState, useMemo} from 'react';
 import ConversationList from './ConversationList.tsx';
 import PersonInfo from './PersonInfo.tsx';
 import ChatTabs from './ChatTabs.tsx';
 import {Conversation} from "@/types/Conversation.ts";
+import ChatHeader from "@/components/ChatHeader.tsx";
 
 // ... existing code ...
 
@@ -30,25 +31,29 @@ function ChatWin() {
   }, [selectedConversation, personInfo]);
 
   return (
-    <div className="flex h-full w-full bg-white">
-      <div className="w-1/5 max-w-[280px] min-w-[200px] border-r border-gray-200">
-        <ConversationList
-            onSelect={handleConversationSelect}
-        />
-      </div>
+      <div className="flex flex-col h-full bg-white">
+        <ChatHeader/>
+        <div className="flex-1 flex border-l border-r border-gray-200">
 
-      <div className="flex-1 flex flex-col h-full">
-        <ChatTabs
-          conversation={selectedConversation}
-        />
-      </div>
+          <div className="w-1/5 max-w-[280px] min-w-[200px] border-r border-gray-200">
+            <ConversationList
+                onSelect={handleConversationSelect}
+            />
+          </div>
 
-      <div className="w-1/5 max-w-[280px]  min-w-[200px] border-l border-gray-200">
-        <PersonInfo
-          personInfo={selectedPersonInfo}
-        />
+          <div className="flex-1 flex flex-col h-full">
+            <ChatTabs
+                conversation={selectedConversation}
+            />
+          </div>
+
+          <div className="w-1/5 max-w-[280px]  min-w-[200px] border-l border-gray-200">
+            <PersonInfo
+                personInfo={selectedPersonInfo}
+            />
+          </div>
+        </div>
       </div>
-    </div>
   );
 }
 
