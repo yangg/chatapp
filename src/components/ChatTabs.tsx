@@ -13,7 +13,7 @@ interface ChatMessageProps {
 
 const ChatTabs: React.FC<ChatMessageProps> = () => {
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, content: 'Hello!', sender: 'user', senderName: 'You', timestamp: new Date() },
+    { id: 1, content: `Hi Alice! I'm doing well, thanks. How about you?!`, sender: 'user', senderName: 'You', timestamp: new Date() },
     { id: 2, content: 'Hi there! How can I help you?', sender: 'bot', senderName: 'AI Assistant', timestamp: new Date() },
   ]);
   const [newMessage, setNewMessage] = useState('');
@@ -48,9 +48,9 @@ const ChatTabs: React.FC<ChatMessageProps> = () => {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <>
       {/*  I don't know why it needs to be 500px, but it does work */}
-      <Tabs defaultValue="account" className='flex-1 flex flex-col' style={{height: '500px'}}>
+      <Tabs defaultValue="account" className='flex-1 flex flex-col' >
         <div className="flex justify-center mt-4">
           <TabsList className="justify-center">
             <TabsTrigger value="account">
@@ -61,15 +61,19 @@ const ChatTabs: React.FC<ChatMessageProps> = () => {
             </TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="account" className="flex-1 overflow-y-auto p-4">
-          <ChatMessage
-              messages={messages}
-          />
+        <TabsContent value="account" className="flex-1 relative">
+          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4">
+            <ChatMessage
+                messages={messages}
+            />
+          </div>
         </TabsContent>
-        <TabsContent value="password" className="flex-1 overflow-y-auto p-4">
-          <ChatMessage
-              messages={messages}
-          />
+        <TabsContent value="password" className="flex-1 relative">
+          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4">
+            <ChatMessage
+                messages={messages}
+            />
+          </div>
         </TabsContent>
       </Tabs>
        {/* Message Input */}
@@ -93,7 +97,7 @@ const ChatTabs: React.FC<ChatMessageProps> = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

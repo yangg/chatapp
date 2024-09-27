@@ -19,6 +19,7 @@ function ChatWin() {
     name: 'John Doe',
     phone: '+1 (555) 123-4567',
     email: 'user@example.com',
+    tags: ["Team Lead", "Project Y"],
   });
 
   const selectedPersonInfo = useMemo(() => {
@@ -30,17 +31,23 @@ function ChatWin() {
 
   return (
     <div className="flex h-full w-full bg-white">
-      <ConversationList
-        onSelect={handleConversationSelect}
-      />
+      <div className="w-1/5 max-w-[280px] min-w-[200px] border-r border-gray-200">
+        <ConversationList
+            onSelect={handleConversationSelect}
+        />
+      </div>
 
-      <ChatTabs
-        conversation={selectedConversation}
-      />
+      <div className="flex-1 flex flex-col h-full">
+        <ChatTabs
+          conversation={selectedConversation}
+        />
+      </div>
 
-      <PersonInfo
-        personInfo={selectedPersonInfo}
-      />
+      <div className="w-1/5 max-w-[280px]  min-w-[200px] border-l border-gray-200">
+        <PersonInfo
+          personInfo={selectedPersonInfo}
+        />
+      </div>
     </div>
   );
 }

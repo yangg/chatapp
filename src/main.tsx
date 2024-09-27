@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+
 import { createRoot, Root } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
@@ -8,9 +8,7 @@ let appRoot: Root
 export function render(root: HTMLElement) {
   appRoot = createRoot(root)
   appRoot.render(
-    // <StrictMode>
     <App />
-    // </StrictMode>
   )
 }
 

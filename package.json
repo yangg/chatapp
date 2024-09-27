@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
-    "deploy": "vite build --base=/chatpreview/ && aws s3 sync dist s3://siia-fe-common/chatpreview --delete",
+    "deploy": "vite build --base=/chatpreview/ && aws s3 sync dist s3://siia-fe-common/production/chatpreview --delete",
+    "lib": "BUILD_LIB=1 vite build && aws s3 sync dist s3://siia-fe-common/production/chatapp --delete",
     "lint": "eslint .",
     "preview": "vite preview"
   },

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
+const CHAT_APP_BaseUrl = 'https://d2w7chn7hohz6a.cloudfront.net/chatapp'
+
 declare global {
   interface Window {
     ChatApp: any // Replace 'any' with the actual type of your UMD chat app if known
@@ -13,7 +15,7 @@ const ChatApp: React.FC = () => {
   useEffect(() => {
     // Load JavaScript
     const script = document.createElement('script')
-    script.src = 'http://192.168.0.206:8000/chatapp.umd.js'
+    script.src = `${CHAT_APP_BaseUrl}/chatapp.umd.js`
     script.async = true
     script.onload = () => {
       if (window.ChatApp && containerRef.current) {
@@ -26,7 +28,7 @@ const ChatApp: React.FC = () => {
 
 
     styleRef.current!.textContent = `
-      @import 'http://192.168.0.206:8000/style.css';
+      @import '${CHAT_APP_BaseUrl}/style.css';
       #chat_app { width: 90vw; height: 50vh; position: fixed; bottom: 0; right: 0; border: 1px solid #ddd; z-index: 1000; }
     `
 
