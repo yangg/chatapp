@@ -6,72 +6,80 @@ import {Message} from "@/types/Message.ts";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import TemplateList from "@/components/TemplateList.tsx";
 import {Button} from "@/components/ui/button.tsx";
+import axios from 'axios';
+import { useAsyncFn } from 'react-use';
 
 interface ChatMessageProps {
   conversation: Conversation | null;
 }
 
-const ChatTabs: React.FC<ChatMessageProps> = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, content: `Hi Alice! I'm doing well, thanks. How about you?!`, sender: 'user', senderName: 'You', timestamp: new Date() },
-    { id: 2, content: 'Hi there! How can I help you?', sender: 'bot', senderName: 'AI Assistant', timestamp: new Date() },
-  ]);
+const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const isMessageEmpty = useMemo(() => newMessage.trim().length === 0, [newMessage]);
+  
 
-  const sendMessage = () => {
-    setMessages(prevMessages => [
-      ...prevMessages,
-      {
-        id: prevMessages.length + 1,
-        content: newMessage,
-        sender: 'user',
-        senderName: 'You',
-        timestamp: new Date(),
-      }
-    ]);
-    setNewMessage('');
-  };
+
+  const [state, doFetch] = useAsyncFn(async () => {
+    const {data} = await axios.get('/sleekflow/conversation/message/' + conversation?.conversationId);
+    setMessages((prev) => [...prev, ...data]);
+    return
+  }, [conversation]);
 
   useEffect(() => {
-      setMessages(prevMessages => {
-        const newMessages = [...prevMessages];
-        for (let i = 1; i <= 10; i++) {
-          console.log('i', i);
-          newMessages.push({
-            ...prevMessages[0],
-            id: newMessages.length + 1,
-          });
-        }
-        return newMessages;
-      });
-  }, []);
+    if(conversation) {
+      setMessages([]);
+      doFetch();
+    }
+  }, [conversation]);
+
+  const [sendState, sendMessage] = useAsyncFn(async () => {
+    const channel = conversation.lastMessageChannel
+    const message = {
+      channel,
+      "messageType": "text",
+      "messageContent": newMessage,
+    }
+    if(channel === 'web') {
+      message.webClientSenderId = conversation.userProfile.webClient.webClientUUID
+    } else {
+      message.from = conversation.lastChannelIdentityId
+      message.to = conversation.userProfile.whatsappCloudApiUser.userIdentityId
+    }
+    const newMessageId = new Date().valueOf()
+    setMessages(prevMessages => [
+      {
+        ...message,
+        deliveryType: 'AutomatedMessage',
+        channelIdentityId: message.from,
+        updatedAt: new Date().toISOString(),
+        status: 'Sending',
+        id: newMessageId,
+      },
+      ...prevMessages,
+    ])
+    const {data} = await axios.post('/sleekflow/message', message);
+    console.log(data)
+    setMessages(prevMessages => prevMessages.map(x => x.id === newMessageId ? {...message, ...data} : x))
+    setNewMessage('');
+    return
+  }, [conversation, newMessage]);
 
   return (
     <>
-      {/*  I don't know why it needs to be 500px, but it does work */}
-      <Tabs defaultValue="account" className='flex-1 flex flex-col' >
+      <Tabs defaultValue="whatsappcloudapi" className='flex-1 flex flex-col' >
         <div className="flex justify-center mt-4">
           <TabsList className="justify-center">
-            <TabsTrigger value="account">
+            <TabsTrigger value="whatsappcloudapi">
               WhatsApp
-            </TabsTrigger>
-            <TabsTrigger value="password">
-              WhatsApp (Brook)
             </TabsTrigger>
           </TabsList>
         </div>
-        <TabsContent value="account" className="flex-1 relative">
-          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4">
+        <TabsContent value="whatsappcloudapi" className="flex-1 relative">
+          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 flex flex-col-reverse">
             <ChatMessage
-                messages={messages}
-            />
-          </div>
-        </TabsContent>
-        <TabsContent value="password" className="flex-1 relative">
-          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4">
-            <ChatMessage
-                messages={messages}
+                messages={messages} 
+                conversation={conversation}
             />
           </div>
         </TabsContent>
@@ -96,6 +104,7 @@ const ChatTabs: React.FC<ChatMessageProps> = () => {
             Send
           </Button>
         </div>
+        <p>{sendState.error?.message}</p>
       </div>
     </>
   );

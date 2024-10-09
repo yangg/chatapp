@@ -49,7 +49,8 @@ function ChatWin() {
 
           <div className="w-1/5 max-w-[280px]  min-w-[200px] border-l border-gray-200">
             <PersonInfo
-                personInfo={selectedPersonInfo}
+                personInfo={selectedConversation?.userProfile}
+                tags={selectedConversation?.conversationHashtags}
             />
           </div>
         </div>

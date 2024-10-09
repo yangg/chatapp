@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { createRoot, Root } from "react-dom/client";
+import ReactDOM from 'react-dom'
 
 class ShadowRootComponent extends HTMLElement {
   constructor() {
@@ -12,21 +12,40 @@ customElements.define('shadow-root-component', ShadowRootComponent);
 
 const ShadowComponent: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const ref = useRef<ShadowRootComponent | null>(null);
-  const rootRef = useRef<Root | null>(null);
+  const rootRef = useRef<any>(null);
 
   useEffect(() => {
-    if (ref.current && ref.current.shadowRoot) {
-      if (!rootRef.current) {
-        rootRef.current = createRoot(ref.current.shadowRoot);
+    async function initReactRoot() {
+      if (ref.current && ref.current.shadowRoot) {
+        const shadowRoot = ref.current.shadowRoot
+        if('createRoot' in ReactDOM) {
+          // React 18
+          const { createRoot } = await import('react-dom/client');
+          if (!rootRef.current) {
+            rootRef.current = createRoot(shadowRoot);
+          }
+          rootRef.current.render(<>{children}</>);
+        } else {
+          // React 17
+          rootRef.current = ReactDOM.render(<>{children}</>, shadowRoot);
+        }
       }
-      rootRef.current.render(<>{children}</>);
     }
+    initReactRoot()
 
     return () => {
-      if (rootRef.current) {
-        rootRef.current.unmount();
-        rootRef.current = null;
-      }
+      // if (ref.current && ref.current.shadowRoot) {
+      //   const shadowRoot = ref.current.shadowRoot;
+
+      //   if (rootRef.current) {
+      //     // React 18
+      //     rootRef.current.unmount();
+      //     rootRef.current = null;
+      //   } else {
+      //     // React 17
+      //     ReactDOM.unmountComponentAtNode(shadowRoot);
+      //   }
+      // }
     };
   }, [children]);
 

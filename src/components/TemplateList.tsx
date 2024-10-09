@@ -13,6 +13,9 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { WaTemplate } from '../types/WaTemplate';
 import { Star } from 'lucide-react';
+import { useAsync } from 'react-use';
+import axios from 'axios';
+import markdownToHtml from '@/lib/markdown';
 
 const TemplateList: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +23,11 @@ const TemplateList: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const [templates, setTemplates] = useState<WaTemplate[]>([]);
+  const state = useAsync(async () => {
+    const {data} = await axios.get('/sleekflow/template')
+    setTemplates(data.whatsappTemplates)
+    return 1
+  }, [])
 
   
 
@@ -44,13 +52,6 @@ const TemplateList: React.FC = () => {
     setTemplates(prevTemplates => prevTemplates.map(t => t.id === id ? { ...t, isStarred: !t.isStarred } : t));
   };
 
-  useEffect(() => {
-    setTemplates([
-      { id: '1', name: 'Welcome Message', category: 'Onboarding', content: `Welcome to our service! We're excited to have you on board.`, isStarred: false },
-      { id: '2', name: 'Order Confirmation', category: 'Sales', content: 'Your order #{{order_number}} has been confirmed and is being processed.', isStarred: true },
-      // ... (other templates)
-    ]);
-  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -83,7 +84,7 @@ const TemplateList: React.FC = () => {
               }`}
               onClick={() => selectTemplate(template.id)}
             >
-              <Star 
+              {/* <Star 
                 className={`absolute top-4 right-4 size-5 text-gray-400 transition-colors ${
                   template.isStarred ? 'text-yellow-400' : 'text-gray-400'
                 }`}
@@ -91,11 +92,11 @@ const TemplateList: React.FC = () => {
                   e.stopPropagation();
                   toggleStar(template.id);
                 }}
-              />
+              /> */}
               <h3 className="mb-2 pr-6">{template.name}</h3>
               <p className="text-xs text-gray-500 mb-2">{template.category}</p>
               <Separator className="mb-2" />
-              <p className="text-sm text-gray-600">{template.content}</p>
+              <div className="text-sm text-gray-600" dangerouslySetInnerHTML={{ __html: markdownToHtml(template.components[0]?.text || '') }} />
             </div>
           ))}
         </div>

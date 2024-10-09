@@ -8,6 +8,6 @@ export function cn(...inputs: ClassValue[]) {
 
 export function getInitials(name: string) {
   if (!name) return '';
-  return name.split(' ').map(n => n.charAt(0)).join('');
+  return name.split(' ').slice(0, 2).map(n => n.charAt(0)).join('');
 }
 

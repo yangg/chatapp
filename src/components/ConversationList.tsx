@@ -4,18 +4,26 @@ import { Conversation } from '../types/Conversation';
 import {Avatar, AvatarFallback} from "@/components/ui/avatar.tsx";
 import { Badge } from "@/components/ui/badge"
 import { getInitials } from '../lib/utils';
+import {useAsync, useAsyncFn} from 'react-use';
+import axios from 'axios';
+
 interface ConversationListProps {
   onSelect: (conversation: Conversation) => void;
   onTypeChange?: (type: string) => void;
 }
 
 const ConversationList: React.FC<ConversationListProps> = ({ onSelect, onTypeChange }) => {
-  const [conversations, setConversations] = useState<Conversation[]>([
-    { id: 1, name: 'Conversation 1', unreadCount: 0 },
-    { id: 2, name: 'Conversation 2', unreadCount: 1 },
-    { id: 3, name: 'Conversation 3', unreadCount: 15 },
-    { id: 4, name: 'Conversation 4', unreadCount: 1000 },
-  ]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [state, doFetch] = useAsyncFn(async () => {
+    const {data} = await axios.get('/sleekflow/conversation', {
+      params: {
+        orderBy: 'desc',
+        limit: 30,
+      }
+    });
+    setConversations((prev) => [...prev, ...data]);
+    return
+  }, []);
 
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [selectedType, setSelectedType] = useState<string>('general');
@@ -31,10 +39,15 @@ const ConversationList: React.FC<ConversationListProps> = ({ onSelect, onTypeCha
   };
 
   useEffect(() => {
-    if (conversations.length > 0) {
+    console.log('fetching conversations3');
+    setConversations([]);
+    doFetch();
+  }, []);
+  useEffect(() => {
+    if(!selectedConversation && conversations.length > 0) {
       selectConversation(conversations[0]);
     }
-  }, []);
+  }, [conversations])
 
   return (
     <div className="flex flex-col h-full">
@@ -51,31 +64,36 @@ const ConversationList: React.FC<ConversationListProps> = ({ onSelect, onTypeCha
       </div>
       <div className="flex-1 relative">
         <div className='overflow-y-auto absolute top-0 left-0 right-0 bottom-0' >
-            {conversations.map((conv) => (
-                <button
-                    key={conv.id}
-                    className={`flex items-center w-full p-3 hover:bg-accent ${
-                        selectedConversation?.id === conv.id ? "bg-accent" : ""
-                    }`}
-                    onClick={() => selectConversation(conv)}
-                >
-                <Avatar className="size-8 mr-4">
-                    <AvatarFallback
-                        className="bg-primary text-white">{getInitials(conv.name)}</AvatarFallback>
-                </Avatar>
-                <div className="text-left flex-1">
-                    <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium">{conv.name}</p>
-                    {conv.unreadCount > 0 && (
-                    <Badge variant="destructive">
-                        {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
-                    </Badge>
-                    )}
-                </div>
-                    <p className="text-xs text-muted-foreground truncate">{conv.lastMessage || 'hello'}</p>
-                </div>
-                </button>
-            ))}
+        {state.loading
+        ? <div>Loading...</div>
+        : state.error
+          ? <div>Error: {state.error.message}</div>
+          : conversations.map((conv) => (
+            <button
+                key={conv.conversationId}
+                className={`flex items-center w-full p-3 hover:bg-accent ${
+                    selectedConversation?.conversationId === conv.conversationId ? "bg-accent" : ""
+                }`}
+                onClick={() => selectConversation(conv)}
+            >
+            <Avatar className="size-8 mr-4">
+                <AvatarFallback
+                    className="bg-primary text-white">{getInitials(conv.userProfile.firstName)}</AvatarFallback>
+            </Avatar>
+            <div className="text-left flex-1">
+                <div className="flex items-center justify-between">
+                <p className="text-sm font-medium truncate">{conv.userProfile.firstName}</p>
+                {conv.unreadMessageCount > 0 && (
+                <Badge variant="destructive">
+                    {conv.unreadMessageCount > 99 ? '99+' : conv.unreadMessageCount}
+                </Badge>
+                )}
+            </div>
+                <p className="text-xs text-muted-foreground truncate">{conv.lastMessage || 'hello'}</p>
+            </div>
+            </button>
+        ))
+      }
 
         </div>
       </div>
