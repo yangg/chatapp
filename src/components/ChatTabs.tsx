@@ -8,6 +8,7 @@ import TemplateList from "@/components/TemplateList.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import axios from 'axios';
 import { useAsyncFn } from 'react-use';
+import {CircleAlert, Loader2} from 'lucide-react'
 
 interface ChatMessageProps {
   conversation: Conversation | null;
@@ -16,44 +17,43 @@ interface ChatMessageProps {
 const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [page, setPage] = useState(1);
+  const [startTimestamp, setStartTimestamp] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const isMessageEmpty = useMemo(() => newMessage.trim().length === 0, [newMessage]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
-  
-  const [state, doFetch] = useAsyncFn(async (pageNum: number) => {
+
+  const [state, doFetch] = useAsyncFn(async () => {
     const limit = 6
     const {data} = await axios.get('/sleekflow/conversation/message/' + conversation.conversationId, {
       params: {
         limit,
-        offset: limit * (pageNum - 1),
+        endTimeStamp: startTimestamp === 0 ? undefined : startTimestamp,
       }
     });
-    
+
     if (data.length < limit) {
       setHasMore(false);
-    } else {
-      setMessages((prev) => [...prev, ...data]);
-      setPage((prevPage) => prevPage + 1);
     }
-  }, [conversation, hasMore]);
+    if(data.length > 0) {
+      setMessages((prev) => [...prev, ...data]);
+      setStartTimestamp(data[data.length - 1].timestamp - 1);
+    }
+  }, [conversation, hasMore, startTimestamp]);
 
   useEffect(() => {
-    if(conversation) {
-      setMessages([]);
-      setHasMore(true);
-      setPage(1);
-      doFetch(1);
-    }
+    setMessages([]);
+    setHasMore(true);
+    setStartTimestamp(0);
+    doFetch();
   }, [conversation]);
 
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const target = entries[0];
-    if (target.isIntersecting && hasMore && !state.loading) {
-      doFetch(page);
+    if (target.isIntersecting && hasMore && !state.loading && !state.error) {
+      doFetch();
     }
-  }, [doFetch, hasMore, page, state]);
+  }, [doFetch, hasMore, state]);
 
   useEffect(() => {
     const option = {
@@ -116,6 +116,10 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
                 messages={messages}
             />
             <div ref={messagesEndRef} style={{ height: "1px" }}></div>
+            <div className={`flex justify-center items-center pb-4 ${messages.length === 0 ? 'flex-1' : ''}`}>
+              {state.loading && <><Loader2 className="h-6 w-6 animate-spin" /> <span className={'text-xs ml-2'}>Loading...</span></>}
+              {state.error && <><CircleAlert className="ml-1 size-4 text-destructive" /><span className={'text-xs ml-2 text-destructive'}>{state.error.message}</span></>}
+            </div>
           </div>
         </TabsContent>
       </Tabs>

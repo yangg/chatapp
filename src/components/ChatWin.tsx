@@ -16,19 +16,6 @@ function ChatWin() {
     console.log(`Selected conversation: `, conv);
   };
 
-  const [personInfo] = useState({
-    name: 'John Doe',
-    phone: '+1 (555) 123-4567',
-    email: 'user@example.com',
-    tags: ["Team Lead", "Project Y"],
-  });
-
-  const selectedPersonInfo = useMemo(() => {
-    if (selectedConversation) {
-      return personInfo;
-    }
-    return null;
-  }, [selectedConversation, personInfo]);
 
   return (
       <div className="flex flex-col h-full bg-white">
@@ -42,9 +29,9 @@ function ChatWin() {
           </div>
 
           <div className="flex-1 flex flex-col h-full">
-            <ChatTabs
+            {selectedConversation ? <ChatTabs
                 conversation={selectedConversation}
-            />
+            /> : <div className="flex-1 flex items-center justify-center">Select a conversation</div>}
           </div>
 
           <div className="w-1/5 max-w-[280px]  min-w-[200px] border-l border-gray-200">
