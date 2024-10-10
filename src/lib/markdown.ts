@@ -2,6 +2,8 @@ import {marked} from 'marked';
 
 
 export default function markdownToHtml(markdown: string) {
-    return marked.parse(markdown);
+    return marked.parse(markdown, {
+        breaks: true
+    });
 }
 

@@ -16,7 +16,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ messages }) => {
   return (
     <>
       {messages.map((message) => {
-        const isSender = message.channel === 'web' ? message.deliveryType === 'AutomatedMessage' : message.from === message.channelIdentityId;
+        const isSender = message.channel === 'web' ? message.isSentFromSleekflow : message.from === message.channelIdentityId;
         return (
           <div
           key={message.id}
@@ -27,9 +27,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ messages }) => {
               isSender ? "bg-primary text-primary-foreground" : "bg-muted"
             }`}
           >
-            <div className="text-sm" dangerouslySetInnerHTML={{ __html: markdownToHtml(message.messageContent) }} />
+            { message.messageType === 'file' 
+            ? <div>file</div> 
+            : <div className="text-sm" dangerouslySetInnerHTML={{ __html: markdownToHtml(message.messageContent) }} />
+            }
             <div className={`text-xs text-muted-foreground mt-1 flex items-center  ${isSender ? "justify-end" : ""} `}>
-              {!isSender && <span className="mr-1">{message.dynamicChannelSender?.userDisplayName}</span> }
+              {!isSender && <span className="mr-1">{message.dynamicChannelSender?.userDisplayName || message.webClientSender.name}</span> }
               <span>{formatTime(message.updatedAt)}</span>
               {isSender && message.status === 'Read' && (
                 <CheckCheck className="ml-1 size-4" />
@@ -38,7 +41,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ messages }) => {
                 <Clock3 className="ml-1 size-4" />
               )}
               {isSender && message.status === 'Failed' && (
-                <CircleAlert className="ml-1 size-4 text-danger" />
+                <CircleAlert className="ml-1 size-4 text-destructive" />
               )}
               {isSender && message.status === 'Received' && (
                 <MessageSquareDot className="ml-1 size-4" />
