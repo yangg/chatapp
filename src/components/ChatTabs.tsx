@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState, useRef, useCallback} from 'react';
+import React, {useEffect, useMemo, useState, useRef, useCallback, useLayoutEffect} from 'react';
 import ChatMessage from './ChatMessage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Conversation } from '../types/Conversation.ts';
@@ -15,6 +15,23 @@ interface ChatMessageProps {
 }
 
 const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
+  const containerRef = useRef<HTMLElement>();
+  const snapShot = useRef(false);
+  const isUpdate = useRef(false);
+
+  if (containerRef.current && isUpdate.current) {
+    // DOM Re-render 之前
+    const listNode = containerRef.current!;
+    snapShot.current = listNode.scrollTop > -60; // should restore position
+  }
+  useLayoutEffect(() => {
+    isUpdate.current = true;
+    if (snapShot.current) {
+      containerRef.current!.scrollTop = 0;
+    }
+  });
+
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [hasMore, setHasMore] = useState(true);
@@ -70,14 +87,13 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
   const sendMessage = async () => {
     const channel = conversation.lastMessageChannel
     const message: NewMessage = {
-      channel,
       "messageType": "text",
       "messageContent": newMessage,
       ...(channel === 'web' ? {
-        // channel,
+        channel,
         webClientSenderId: conversation.userProfile.webClient.webClientUUID,
       }: {
-        // channel,
+        channel,
         from: conversation.lastChannelIdentityId,
         channelIdentityId: conversation.lastChannelIdentityId,
         to: conversation.userProfile.whatsappCloudApiUser.userIdentityId,
@@ -97,7 +113,6 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
     ])
     setNewMessage('');
     const {data} = await axios.post('/sleekflow/message', message);
-    console.log(data)
     setMessages(prevMessages => prevMessages.map(x => x.id === newMessageId ? {...message, ...data} : x))
     return
   };
@@ -113,7 +128,7 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
           </TabsList>
         </div>
         <TabsContent value="whatsappcloudapi" className="flex-1 relative">
-          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">
+          <div ref={containerRef} className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">
             <div className="flex-1"></div>
             <ChatMessage
                 messages={messages}

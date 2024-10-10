@@ -29,7 +29,7 @@ const TemplateList: React.FC = () => {
     return 1
   }, [])
 
-  
+
 
   const categories = useMemo(() => [...new Set(templates.map(t => t.category))], [templates]);
 
@@ -73,7 +73,7 @@ const TemplateList: React.FC = () => {
             ))}
           </TabsList>
         </Tabs>
-        <div className="grid grid-cols-3 gap-4 py-2 overflow-y-auto max-h-[600px]">
+        <div className="grid grid-cols-3 gap-4 py-2 overflow-y-auto max-h-[600px] px-[2px]">
           {filteredTemplates.map(template => (
             <div
               key={template.id}
@@ -84,15 +84,16 @@ const TemplateList: React.FC = () => {
               }`}
               onClick={() => selectTemplate(template.id)}
             >
-              {/* <Star 
-                className={`absolute top-4 right-4 size-5 text-gray-400 transition-colors ${
+              {/*<Star
+                className={`absolute top-4 right-4 size-5 transition-colors ${
                   template.isStarred ? 'text-yellow-400' : 'text-gray-400'
                 }`}
+                fill={template.isStarred ? 'currentColor': 'none'}
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleStar(template.id);
                 }}
-              /> */}
+              />*/}
               <h3 className="mb-2 pr-6">{template.name}</h3>
               <p className="text-xs text-gray-500 mb-2">{template.category}</p>
               <Separator className="mb-2" />
