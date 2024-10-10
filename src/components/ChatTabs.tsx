@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useState, useRef, useCallback} from 'react';
 import ChatMessage from './ChatMessage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Conversation } from '../types/Conversation.ts';
-import {Message} from "@/types/Message.ts";
+import {Message, NewMessage} from "@/types/Message.ts";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import TemplateList from "@/components/TemplateList.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -11,24 +11,24 @@ import { useAsyncFn } from 'react-use';
 import {CircleAlert, Loader2} from 'lucide-react'
 
 interface ChatMessageProps {
-  conversation: Conversation | null;
+  conversation: Conversation;
 }
 
 const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [startTimestamp, setStartTimestamp] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const isMessageEmpty = useMemo(() => newMessage.trim().length === 0, [newMessage]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  const [state, doFetch] = useAsyncFn(async () => {
-    const limit = 6
+
+  const [state, doFetch] = useAsyncFn(async (endTimeStamp: number | undefined = undefined) => {
+    const limit = 10
     const {data} = await axios.get('/sleekflow/conversation/message/' + conversation.conversationId, {
       params: {
         limit,
-        endTimeStamp: startTimestamp === 0 ? undefined : startTimestamp,
+        endTimeStamp,
       }
     });
 
@@ -37,23 +37,22 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
     }
     if(data.length > 0) {
       setMessages((prev) => [...prev, ...data]);
-      setStartTimestamp(data[data.length - 1].timestamp - 1);
     }
-  }, [conversation, hasMore, startTimestamp]);
+  }, [conversation, hasMore, messages]);
 
   useEffect(() => {
     setMessages([]);
     setHasMore(true);
-    setStartTimestamp(0);
     doFetch();
   }, [conversation]);
 
+
   const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
     const target = entries[0];
-    if (target.isIntersecting && hasMore && !state.loading && !state.error) {
-      doFetch();
+    if (target.isIntersecting && hasMore && !state.loading && !state.error && messages.length) {
+      doFetch(messages[messages.length - 1].timestamp - 1);
     }
-  }, [doFetch, hasMore, state]);
+  }, [doFetch, hasMore, state, messages]);
 
   useEffect(() => {
     const option = {
@@ -70,25 +69,28 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
 
   const sendMessage = async () => {
     const channel = conversation.lastMessageChannel
-    const message = {
+    const message: NewMessage = {
       channel,
       "messageType": "text",
       "messageContent": newMessage,
+      ...(channel === 'web' ? {
+        // channel,
+        webClientSenderId: conversation.userProfile.webClient.webClientUUID,
+      }: {
+        // channel,
+        from: conversation.lastChannelIdentityId,
+        channelIdentityId: conversation.lastChannelIdentityId,
+        to: conversation.userProfile.whatsappCloudApiUser.userIdentityId,
+      })
     }
-    if(channel === 'web') {
-      message.webClientSenderId = conversation.userProfile.webClient.webClientUUID
-    } else {
-      message.from = conversation.lastChannelIdentityId
-      message.to = conversation.userProfile.whatsappCloudApiUser.userIdentityId
-    }
-    const newMessageId = new Date().valueOf()
+    const newMessageId = Date.now()
     setMessages(prevMessages => [
       {
         ...message,
-        isSentFromSleekflow: true, // for web
-        channelIdentityId: message.from, // for whatsappcloudapi
+        isSentFromSleekflow: true,
         updatedAt: new Date().toISOString(),
         status: 'Sending',
+        timestamp: newMessageId / 1000,
         id: newMessageId,
       },
       ...prevMessages,
@@ -111,19 +113,22 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
           </TabsList>
         </div>
         <TabsContent value="whatsappcloudapi" className="flex-1 relative">
-          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 flex flex-col-reverse">
+          <div className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">
+            <div className="flex-1"></div>
             <ChatMessage
                 messages={messages}
             />
-            <div ref={messagesEndRef} style={{ height: "1px" }}></div>
-            <div className={`flex justify-center items-center pb-4 ${messages.length === 0 ? 'flex-1' : ''}`}>
-              {state.loading && <><Loader2 className="h-6 w-6 animate-spin" /> <span className={'text-xs ml-2'}>Loading...</span></>}
-              {state.error && <><CircleAlert className="ml-1 size-4 text-destructive" /><span className={'text-xs ml-2 text-destructive'}>{state.error.message}</span></>}
+            <div ref={messagesEndRef} style={{height: "1px"}}></div>
+            <div className={`flex justify-center items-center pb-4 empty:hidden ${messages.length === 0 ? 'flex-1' : ''}`}>
+              {state.loading && <><Loader2 className="h-6 w-6 animate-spin"/> <span
+                className={'text-xs ml-2'}>Loading...</span></>}
+              {state.error && <><CircleAlert className="ml-1 size-4 text-destructive"/><span
+                className={'text-xs ml-2 text-destructive'}>{state.error.message}</span></>}
             </div>
           </div>
         </TabsContent>
       </Tabs>
-       {/* Message Input */}
+      {/* Message Input */}
        <div className='p-4'>
         <Textarea
           value={newMessage}
