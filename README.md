@@ -2,6 +2,9 @@
 ## Theme Generator
 https://zippystarter.com/tools/shadcn-ui-theme-generator
 
+## Lucide icons
+https://lucide.dev/icons/
+
 
 # React + TypeScript + Vite
 

@@ -1,58 +1,99 @@
-import React from 'react';
-import { Message } from '../types/Message';
-import markdownToHtml from '../lib/markdown';
-import { CheckCheck, CircleAlert, Clock3, MessageSquareDot } from 'lucide-react';
+import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
+import ChatMessageItem from "@/components/ChatMessageItem.tsx";
+import {useAsyncFn} from "react-use";
+import axios from "axios";
+import {CircleAlert, Loader2} from "lucide-react";
+import {useAtomSelector, useAtomState} from "@zedux/react";
+import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
+import {messageState} from "@/atoms/messages.ts";
 
-const formatTime = (date: string) => {
-  return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-};
 
-interface ChatMessageProps {
-  messages: Message[];
-}
+const ChatMessage: React.FC = () => {
+  const selectedConversation = useAtomSelector(getSelectedConversation)!;
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ messages }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const snapShot = useRef(false);
+  const isUpdate = useRef(false);
+
+  if (containerRef.current && isUpdate.current) {
+    // DOM Re-render 之前
+    const listNode = containerRef.current!;
+    snapShot.current = listNode.scrollTop > -60; // should restore position
+  }
+  useLayoutEffect(() => {
+    isUpdate.current = true;
+    if (snapShot.current) {
+      containerRef.current!.scrollTop = 0;
+    }
+  });
+
+
+  const [messages, {appendMessage, clearMessage}] = useAtomState(messageState);
+  const [hasMore, setHasMore] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+
+  const [state, doFetch] = useAsyncFn(async (endTimeStamp: number | undefined = undefined) => {
+    const limit = 10
+    const {data} = await axios.get('/sleekflow/conversation/message/' + selectedConversation.conversationId, {
+      params: {
+        limit,
+        endTimeStamp,
+      }
+    });
+
+    if (data.length < limit) {
+      setHasMore(false);
+    }
+    if(data.length > 0) {
+      appendMessage(data);
+    }
+  }, [selectedConversation, hasMore, messages]);
+
+  useEffect(() => {
+    clearMessage()
+    setHasMore(true);
+    doFetch();
+  }, [selectedConversation]);
+
+
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const target = entries[0];
+    if (target.isIntersecting && hasMore && !state.loading && !state.error && messages.length) {
+      // 如果减去 1 秒有丢消息情况，可以不减，然后合并时去除重复的。
+      doFetch(messages[messages.length - 1].timestamp - 1);
+    }
+  }, [doFetch, hasMore, state, messages]);
+
+  useEffect(() => {
+    const option = {
+      root: null,
+      rootMargin: "20px",
+      threshold: 1.0
+    };
+    observerRef.current = new IntersectionObserver(handleObserver, option);
+    if (messagesEndRef.current) observerRef.current.observe(messagesEndRef.current);
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    }
+  }, [handleObserver]);
 
   return (
-    <>
-      {messages.map((message) => {
-        const isSender = message.channel === 'web' ? message.isSentFromSleekflow : message.from === message.channelIdentityId;
-        return (
-          <div
-          key={message.id}
-          className={`flex mb-4 ${isSender ? "justify-end" : "justify-start"}`}
-        >
-          <div
-            className={`max-w-[70%] min-w-[150px] p-3 rounded-lg ${
-              isSender ? "bg-primary text-primary-foreground" : "bg-muted"
-            }`}
-          >
-            { message.messageType === 'file' 
-            ? <div>file</div> 
-            : <div className="text-sm" dangerouslySetInnerHTML={{ __html: markdownToHtml(message.messageContent) }} />
-            }
-            <div className={`text-xs text-muted-foreground mt-1 flex items-center  ${isSender ? "justify-end" : ""} `}>
-              {!isSender && <span className="mr-1">{message.dynamicChannelSender?.userDisplayName || message.webClientSender.name}</span> }
-              <span>{formatTime(message.updatedAt)}</span>
-              {isSender && message.status === 'Read' && (
-                <CheckCheck className="ml-1 size-4" />
-              )}
-              {isSender && message.status === 'Sending' && (
-                <Clock3 className="ml-1 size-4" />
-              )}
-              {isSender && message.status === 'Failed' && (
-                <CircleAlert className="ml-1 size-4 text-destructive" />
-              )}
-              {isSender && message.status === 'Received' && (
-                <MessageSquareDot className="ml-1 size-4" />
-              )}
-            </div>
-          </div>
+      <div ref={containerRef}
+           className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">
+        <div className="flex-1"></div>
+        {messages.map((message) => <ChatMessageItem key={message.id} message={message}/>)}
+        <div ref={messagesEndRef} style={{height: "1px"}}></div>
+        <div className={`flex justify-center items-center pb-4 empty:hidden ${messages.length === 0 ? 'flex-1' : ''}`}>
+          {state.loading && <><Loader2 className="h-6 w-6 animate-spin"/> <span
+            className={'text-xs ml-2'}>Loading...</span></>}
+          {state.error && <><CircleAlert className="ml-1 size-4 text-destructive"/><span
+            className={'text-xs ml-2 text-destructive'}>{state.error.message}</span></>}
         </div>
-        )
-      })}
-    </>
-  );
+      </div>
+)
+  ;
 };
 
 export default ChatMessage;
