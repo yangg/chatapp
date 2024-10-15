@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Conversation } from '../types/Conversation.ts';
-import {NewMessage} from "@/types/Message.ts";
+import {NewMessage, TextMessage} from "@/types/Message.ts";
 import {Textarea} from "@/components/ui/textarea.tsx";
 import TemplateList from "@/components/TemplateList.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -16,55 +16,35 @@ interface ChatMessageProps {
 }
 
 const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
-  const messagesInst = useAtomInstance(messageState)
+  const messagesInst = useAtomInstance(messageState).exports
 
+  const tabs = useMemo(() => {
+    return [conversation.lastMessageChannel === 'web' ? 'WebChat' : 'WhatsApp']
+  }, [conversation])
   const [newMessage, setNewMessage] = useState('');
   const isSendable = useMemo(() => newMessage.trim().length === 0, [newMessage]);
 
-  const sendMessage = async () => {
-    const channel = conversation.lastMessageChannel
-    const message: NewMessage = {
-      "messageType": "text",
-      "messageContent": newMessage,
-      ...(channel === 'web' ? {
-        channel,
-        webClientSenderId: conversation.userProfile.webClient.webClientUUID,
-      }: {
-        channel,
-        from: conversation.lastChannelIdentityId,
-        channelIdentityId: conversation.lastChannelIdentityId,
-        to: conversation.userProfile.whatsappCloudApiUser.userIdentityId,
-      })
+  const sendMessage = () => {
+    const params: TextMessage = {
+      messageType: 'text',
+      messageContent: newMessage,
     }
-    const newMessageId = Date.now()
-    messagesInst.exports.prependMessage([
-      {
-        ...message,
-        isSentFromSleekflow: true,
-        updatedAt: new Date().toISOString(),
-        status: 'Sending',
-        timestamp: newMessageId / 1000,
-        id: newMessageId,
-      },
-    ])
-    setNewMessage('');
-    const {data} = await axios.post('/sleekflow/message', message);
-    messagesInst.exports.setState(prevMessages => prevMessages.map(x => x.id === newMessageId ? {...message, ...data} : x))
-  };
+    setNewMessage('')
+    messagesInst.sendMessage(params, conversation)
+  }
 
   return (
     <>
-      <Tabs defaultValue="whatsappcloudapi" className='flex-1 flex flex-col' >
+      <Tabs defaultValue={tabs[0]} key={conversation.conversationId} className='flex-1 flex flex-col' >
         <div className="flex justify-center mt-4">
           <TabsList className="justify-center">
-            <TabsTrigger value="whatsappcloudapi">
-              WhatsApp
-            </TabsTrigger>
+            {tabs.map(tab => (<TabsTrigger value={tab} key={tab}>{tab}</TabsTrigger>))}
           </TabsList>
         </div>
-        <TabsContent value="whatsappcloudapi" className="flex-1 relative">
+        {tabs.map(tab => (<TabsContent value={tab} key={tab} className="flex-1 relative">
           <ChatMessage/>
-        </TabsContent>
+        </TabsContent>))}
+
       </Tabs>
       {/* Message Input */}
        <div className='p-4'>

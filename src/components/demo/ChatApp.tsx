@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
-const CHAT_APP_BaseUrl = 'https://d2w7chn7hohz6a.cloudfront.net/chatapp'
+// const CHAT_APP_BaseUrl = 'https://d2w7chn7hohz6a.cloudfront.net/chatapp'
+const CHAT_APP_BaseUrl = 'http://192.168.0.206:8000'
 
 declare global {
   interface Window {
@@ -12,16 +13,24 @@ declare global {
   }
 }
 
+function loadScript(src: string) {
+  return new Promise((resolve) => {
+    const script = document.createElement('script')
+    script.src = src
+    script.async = true
+    script.onload = resolve
+    document.body.appendChild(script)
+  })
+}
+
 const ChatApp: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null)
   const styleRef = useRef<HTMLStyleElement>(null)
 
   useEffect(() => {
-    // Load JavaScript
-    const script = document.createElement('script')
-    script.src = `${CHAT_APP_BaseUrl}/chatapp.umd.js`
-    script.async = true
-    script.onload = () => {
+    Promise.all([
+      // loadScript('https://d2w7chn7hohz6a.cloudfront.net/libs/socket.io/4.7.5/socket.io.min.js'),
+      loadScript(`${CHAT_APP_BaseUrl}/chatapp.umd.js`)]).then(() => {
       if (window.ChatApp && containerRef.current) {
         window.ChatApp.render(containerRef.current)
         window.ChatApp.toggleChat = function() {
@@ -33,8 +42,7 @@ const ChatApp: React.FC = () => {
       } else {
         console.error('ChatApp not found or container not available')
       }
-    }
-    document.body.appendChild(script)
+    })
 
 
     styleRef.current!.textContent = `

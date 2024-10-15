@@ -12,18 +12,32 @@ interface WhatsappCloudApiMessage {
   to: string
 }
 
-export type NewMessage = {
-  messageType?: 'text' | 'file' | 'template'
+export interface TextMessage {
+  messageType: 'text'
   messageContent: string
-} & (WebMessage | WhatsappCloudApiMessage)
+}
+
+export interface TemplateMessage {
+  messageType: 'template'
+  extendedMessage: {
+    WhatsappCloudApiTemplateMessageObject: {
+      templateName : string,
+      components: object[],
+      language: string,
+    }
+  },
+}
+
+export type NewMessage = TextMessage & (WebMessage | WhatsappCloudApiMessage) |
+    (TemplateMessage & WhatsappCloudApiMessage)
 
 interface BaseMessage {
   id: number
   isSentFromSleekflow: boolean
   updatedAt: string
   timestamp: number
-  status: 'Read' | 'Sending' | 'Received' | 'Failed'
+  status: 'Read' | 'Sending' | 'Received' | 'Failed' | 'Sent'
 }
 
 
-export type Message = BaseMessage & NewMessage & (WebMessage | WhatsappCloudApiMessage)
+export type Message = BaseMessage & NewMessage

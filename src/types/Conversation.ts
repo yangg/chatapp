@@ -21,5 +21,6 @@ type WhatsappCloudApiConversation = {
 
 export type Conversation = {
   conversationId: string
-  lastChannelIdentityId: string,
+  lastChannelIdentityId: string
+  modifiedAt: string
 } & (WebConversation | WhatsappCloudApiConversation)

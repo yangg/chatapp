@@ -1,3 +1,5 @@
 
+import axios from "./axios";
+import {io} from 'socket.io-client'
 
-export const socket = io('http://192.168.0.206:6003')
+export const socket = io(axios.defaults.baseURL)

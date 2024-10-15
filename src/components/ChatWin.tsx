@@ -14,7 +14,7 @@ import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
 
 function ChatWin() {
   const selectedConversation = useAtomSelector(getSelectedConversation);
-  const conversationInst = useAtomInstance(conversationState)
+  const conversationInst = useAtomInstance(conversationState).exports
 
 
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -29,7 +29,7 @@ function ChatWin() {
     }
 
     function onConversation(value) {
-      conversationInst.exports.prependConversation(value)
+      conversationInst.prependConversation(value)
       console.log('conv', value)
     }
 

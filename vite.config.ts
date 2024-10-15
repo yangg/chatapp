@@ -1,9 +1,9 @@
 import path from "path"
 import react from "@vitejs/plugin-react"
-import { defineConfig } from "vite"
+import {defineConfig} from "vite"
 
 const isBuildLib = !!process.env.BUILD_LIB
- 
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -23,15 +23,19 @@ export default defineConfig({
         fileName: () => `chatapp.umd.js`
       },
     } : {}),
-    // rollupOptions: {
-    //   external: ['react', 'react-dom'],
-    //   output: {
-    //     assetFileNames: '[name].[ext]',
-    //     globals: {
-    //       react: 'React',
-    //       'react-dom': 'ReactDOM',
-    //     },
-    //   },
-    // },
+    rollupOptions: {
+      external: [
+        // 'socket.io-client',
+        // 'react',
+        // 'react-dom'
+      ],
+      output: {
+        globals: {
+          'socket.io-client': 'io',
+          // react: 'React',
+          // 'react-dom': 'ReactDOM'
+        }
+      }
+    },
   },
 })

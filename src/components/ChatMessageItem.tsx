@@ -1,6 +1,7 @@
 import markdownToHtml from "@/lib/markdown.ts";
 import {CheckCheck, CircleAlert, Clock3, MessageSquareDot} from "lucide-react";
 import {Message} from "@/types/Message.ts";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 
 const formatTime = (date: string) => {
   return new Date(date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -23,7 +24,11 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
         >
           {message.messageType === 'file'
               ? <div>file</div>
-              : <div className="text-sm" dangerouslySetInnerHTML={{__html: markdownToHtml(message.messageContent)}}/>
+              : message.messageType === 'template'
+                  ? <div className="text-sm"
+                         dangerouslySetInnerHTML={{__html: markdownToHtml(message.messageContent || 'Template Sending...')}}/>
+                  :
+                  <div className="text-sm" dangerouslySetInnerHTML={{__html: markdownToHtml(message.messageContent)}}/>
           }
           <div className={`text-xs text-muted-foreground mt-1 flex items-center  ${isSender ? "justify-end" : ""} `}>
             {!isSender && <span
@@ -36,9 +41,18 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
                 <Clock3 className="ml-1 size-4"/>
             )}
             {isSender && message.status === 'Failed' && (
-                <CircleAlert className="ml-1 size-4 text-destructive"/>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <CircleAlert className="ml-1 size-4 text-destructive"/>
+                    </TooltipTrigger>
+                    <TooltipContent className={"bg-accent text-destructive"}>
+                      {message.channelStatusMessage}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
             )}
-            {isSender && message.status === 'Received' && (
+            {isSender && (message.status === 'Received' || message.status === 'Sent') && (
                 <MessageSquareDot className="ml-1 size-4"/>
             )}
           </div>

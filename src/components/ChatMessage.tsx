@@ -7,9 +7,16 @@ import {useAtomSelector, useAtomState} from "@zedux/react";
 import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
 import {messageState} from "@/atoms/messages.ts";
 
+type getMessageListParams = {
+  endTimeStamp?: number
+  startTimeStamp?: number
+  limit?: number
+}
+
 
 const ChatMessage: React.FC = () => {
   const selectedConversation = useAtomSelector(getSelectedConversation)!;
+  let updateId = false
 
   const containerRef = useRef<HTMLDivElement>(null);
   const snapShot = useRef(false);
@@ -28,33 +35,46 @@ const ChatMessage: React.FC = () => {
   });
 
 
-  const [messages, {appendMessage, clearMessage}] = useAtomState(messageState);
+  const [messages, {appendMessage, prependMessage, clearMessage}] = useAtomState(messageState);
   const [hasMore, setHasMore] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
 
-  const [state, doFetch] = useAsyncFn(async (endTimeStamp: number | undefined = undefined) => {
-    const limit = 10
+  const [state, doFetch] = useAsyncFn(async (params: getMessageListParams = {}, prepend = false) => {
+    params.limit = params.limit || 10
     const {data} = await axios.get('/sleekflow/conversation/message/' + selectedConversation.conversationId, {
-      params: {
-        limit,
-        endTimeStamp,
-      }
+      params
     });
 
-    if (data.length < limit) {
+    if (data.length < params.limit) {
       setHasMore(false);
     }
     if(data.length > 0) {
-      appendMessage(data);
+      if(!prepend) {
+        appendMessage(data);
+      } else {
+        prependMessage(data);
+      }
     }
-  }, [selectedConversation, hasMore, messages]);
+  }, [selectedConversation.conversationId, hasMore, messages]);
 
   useEffect(() => {
+    console.log('Messages for: ', selectedConversation.conversationId, selectedConversation.userProfile?.firstName);
+    updateId = true
     clearMessage()
     setHasMore(true);
     doFetch();
+  }, [selectedConversation.conversationId]);
+  useEffect(() => {
+    // new message notify
+    if(!updateId) {
+      console.log('New Message')
+      doFetch({
+        limit: 100,
+        startTimeStamp: messages[0].timestamp
+      }, true)
+    }
   }, [selectedConversation]);
 
 
@@ -62,7 +82,7 @@ const ChatMessage: React.FC = () => {
     const target = entries[0];
     if (target.isIntersecting && hasMore && !state.loading && !state.error && messages.length) {
       // 如果减去 1 秒有丢消息情况，可以不减，然后合并时去除重复的。
-      doFetch(messages[messages.length - 1].timestamp - 1);
+      doFetch({endTimeStamp: messages[messages.length - 1].timestamp - 1});
     }
   }, [doFetch, hasMore, state, messages]);
 
