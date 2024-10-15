@@ -11,6 +11,17 @@ interface ChatMessageItemProps {
   message: Message;
 }
 
+function getSenderName(message: Message) {
+  switch (message.channel) {
+    case 'web':
+      return message.webClientSender.name;
+    case 'whatsappcloudapi':
+      return message.whatsappCloudApiSender.name;
+    default:
+      return '';
+  }
+}
+
 export default function ChatMessageItem({message}: ChatMessageItemProps) {
   const isSender = message.channel === 'web' ? message.isSentFromSleekflow : message.from === message.channelIdentityId;
   return (
@@ -32,7 +43,7 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
           }
           <div className={`text-xs text-muted-foreground mt-1 flex items-center  ${isSender ? "justify-end" : ""} `}>
             {!isSender && <span
-              className="mr-1">{message.dynamicChannelSender?.userDisplayName || message.webClientSender.name}</span>}
+              className="mr-1">{getSenderName(message)}</span>}
             <span>{formatTime(message.updatedAt)}</span>
             {isSender && message.status === 'Read' && (
                 <CheckCheck className="ml-1 size-4"/>
