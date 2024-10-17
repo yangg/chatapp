@@ -2,7 +2,7 @@ import {atom, injectStore, api} from "@zedux/react";
 import {Conversation} from "@/types/Conversation.ts";
 
 
-export const conversationState = atom('conversation', () => {
+export const conversationsState = atom('conversation', () => {
   const store = injectStore<Conversation[]>([])
 
   const appendConversation = (items: Conversation[]) => {

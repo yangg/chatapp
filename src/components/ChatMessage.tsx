@@ -55,7 +55,7 @@ const ChatMessage: React.FC = () => {
   }, [selectedConversation.conversationId, hasMore, messages]);
 
   useEffect(() => {
-    console.log('Messages for: ', selectedConversation.conversationId, selectedConversation.userProfile?.firstName);
+    console.log('Messages for: ', selectedConversation.conversationId, selectedConversation.title);
     updateId = true
     clearMessage()
     setHasMore(true);
@@ -67,7 +67,7 @@ const ChatMessage: React.FC = () => {
       console.log('New Message')
       doFetch({
         limit: 100,
-        startTimeStamp: messages[0].timestamp
+        startTimeStamp: Math.min(messages[0]?.timestamp, Math.floor(Date.now()/1000) - 60) // 60s 内防止消息丢失
       }, true)
     }
   }, [selectedConversation]);
@@ -78,6 +78,7 @@ const ChatMessage: React.FC = () => {
   }, [messages, doFetch]);
 
 
+  console.log(messages, messages.map((m) => m.id))
   return (
       <div ref={containerRef}
            className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">

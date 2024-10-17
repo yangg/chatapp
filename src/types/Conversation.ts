@@ -3,24 +3,17 @@
 
 type WebConversation = {
   lastMessageChannel: 'web',
-  userProfile: {
-    webClient: {
-      webClientUUID: string
-    }
-  }
+  webClientSenderId: string
 }
 
 type WhatsappCloudApiConversation = {
   lastMessageChannel: 'whatsappcloudapi'
-  userProfile: {
-    whatsappCloudApiUser: {
-      userIdentityId: string
-    }
-  }
+  userIdentityId: string
 }
 
 export type Conversation = {
   conversationId: string
-  lastChannelIdentityId: string
+  title: string
+  channelIdentityId: string
   modifiedAt: string
 } & (WebConversation | WhatsappCloudApiConversation)

@@ -14,9 +14,9 @@ interface ChatMessageItemProps {
 function getSenderName(message: Message) {
   switch (message.channel) {
     case 'web':
-      return message.webClientSender.name;
+      return message.webClientSender?.name;
     case 'whatsappcloudapi':
-      return message.whatsappCloudApiSender.name;
+      return message.dynamicChannelSender?.userDisplayName;
     default:
       return '';
   }

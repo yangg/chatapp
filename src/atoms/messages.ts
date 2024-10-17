@@ -29,36 +29,28 @@ export const messageState = atom('messages', () => {
   }
 
   const sendMessage = injectCallback(async(newMessage: TextMessage | TemplateMessage, conversation: Conversation) => {
-    console.log('send', conversation.conversationId, conversation.userProfile?.firstName)
+    console.log('send', conversation.conversationId, conversation.title)
     const channel = conversation.lastMessageChannel
     const message: NewMessage = {
       ...newMessage,
       ...(channel === 'web' ? {
         channel,
-        webClientSenderId: conversation.userProfile.webClient.webClientUUID,
+        webClientSenderId: conversation.webClientUUID,
       }: {
         channel,
-        from: conversation.lastChannelIdentityId,
-        channelIdentityId: conversation.lastChannelIdentityId,
-        to: conversation.userProfile.whatsappCloudApiUser.userIdentityId,
+        from: conversation.channelIdentityId,
+        channelIdentityId: conversation.channelIdentityId,
+        to: conversation.userIdentityId,
       })
     }
     const newMessageId = Date.now()
-    console.log(33, {
-      ...message,
-      isSentFromSleekflow: true,
-      updatedAt: new Date().toISOString(),
-      status: 'Sending',
-      timestamp: newMessageId / 1000,
-      id: newMessageId,
-    },)
     prependMessage([
       {
         ...message,
         isSentFromSleekflow: true,
         updatedAt: new Date().toISOString(),
         status: 'Sending',
-        timestamp: newMessageId / 1000,
+        timestamp: Math.floor(newMessageId / 1000),
         id: newMessageId,
       },
     ])

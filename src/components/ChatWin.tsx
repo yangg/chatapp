@@ -6,7 +6,7 @@ import {Conversation} from "@/types/Conversation.ts";
 import ChatHeader from "@/components/ChatHeader.tsx";
 import {socket} from "@/lib/socket.ts";
 import {useAtomInstance, useAtomSelector} from "@zedux/react";
-import {conversationState} from "@/atoms/conversations.ts";
+import {conversationsState} from "@/atoms/conversations.ts";
 import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
 
 
@@ -14,7 +14,7 @@ import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
 
 function ChatWin() {
   const selectedConversation = useAtomSelector(getSelectedConversation);
-  const conversationInst = useAtomInstance(conversationState).exports
+  const conversationInst = useAtomInstance(conversationsState).exports
 
 
   const [isConnected, setIsConnected] = useState(socket.connected);
@@ -29,7 +29,7 @@ function ChatWin() {
     }
 
     function onConversation(value) {
-      conversationInst.prependConversation(value)
+      // conversationInst.prependConversation(value)
       console.log('conv', value)
     }
 
