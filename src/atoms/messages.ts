@@ -28,12 +28,12 @@ export const messageState = atom('messages', (_id: string) => {
 
   const sendMessage = injectCallback(async(newMessage: TextMessage | TemplateMessage, conversation: Conversation) => {
     console.log('send', conversation.conversationId, conversation.title)
-    const channel = conversation.lastMessageChannel
+    const channel = conversation.channel
     const message: NewMessage = {
       ...newMessage,
       ...(channel === 'web' ? {
         channel,
-        webClientSenderId: conversation.webClientUUID,
+        webClientSenderId: conversation.webClientSenderId,
       }: {
         channel,
         from: conversation.channelIdentityId,

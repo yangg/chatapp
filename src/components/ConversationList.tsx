@@ -6,18 +6,23 @@ import {Badge} from "@/components/ui/badge"
 import {getInitials} from '../lib/utils';
 import {useAsyncFn} from 'react-use';
 import axios from 'axios';
-import {useAtomState} from "@zedux/react";
+import {useAtomSelector, useAtomState} from "@zedux/react";
 import {conversationsState} from "@/atoms/conversations.ts";
 import {selectedConversationIdState} from "@/atoms/selectedConversation.ts";
 import InfiniteScroll from "@/components/InfiniteScroll.tsx";
-import {conversationTypesState} from "@/atoms/conversationTypes.ts";
+import {
+  conversationTypesState,
+  getSelectedConversationType,
+  selectedConversationTypeIdState
+} from "@/atoms/conversationTypes.ts";
 
 
 const ConversationList: React.FC = () => {
   const [conversationTypes] = useAtomState(conversationTypesState)
   const [conversations, {appendConversation, clearConversation}] = useAtomState(conversationsState);
   const [selectedConversationId, setSelectedConversationId] = useAtomState(selectedConversationIdState);
-  const [selectedType, setSelectedType] = useState(conversationTypes[1]);
+  const [selectedConversationTypeId, setSelectedConversationTypeId] = useAtomState(selectedConversationTypeIdState)
+  const selectedConversationType = useAtomSelector(getSelectedConversationType)
   const [hasMore, setHasMore] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [state, loadNext] = useAsyncFn(async (page = currentPage) => {
@@ -26,7 +31,7 @@ const ConversationList: React.FC = () => {
       params: {
         limit,
         offset: page * limit,
-        getData: selectedType.getData
+        getData: selectedConversationType.getData
       },
     })
     appendConversation(data)
@@ -36,20 +41,25 @@ const ConversationList: React.FC = () => {
       setCurrentPage(currentPage + 1);
     }
     return
-  }, [currentPage, selectedType]);
+  }, [currentPage, selectedConversationType]);
 
 
+  function onTypeChange(value) {
+    setSelectedConversationTypeId(value)
+    setSelectedConversationId([''])
+  }
   function selectConversation(conv: Conversation) {
     setSelectedConversationId([conv.conversationId]);
   }
 
   useEffect(() => {
-    console.log('fetching conversations', selectedType);
+    console.log('fetching conversations', selectedConversationTypeId);
+    setHasMore(true)
     clearConversation();
     setCurrentPage(0)
     setSelectedConversationId([''])
     loadNext(0)
-  }, [selectedType]);
+  }, [selectedConversationTypeId]);
   useEffect(() => {
     if (!selectedConversationId[0] && conversations.length > 0) {
       selectConversation(conversations[0]);
@@ -59,7 +69,7 @@ const ConversationList: React.FC = () => {
   return (
       <div className="flex flex-col h-full">
         <div className="p-3 border-b border-gray-200">
-          <Select value={selectedType.title} onValueChange={(value) => setSelectedType(conversationTypes.find(type => type.title === value)!)}>
+          <Select value={selectedConversationTypeId} onValueChange={onTypeChange}>
             <SelectTrigger>
               <SelectValue/>
             </SelectTrigger>
@@ -82,8 +92,8 @@ const ConversationList: React.FC = () => {
 
 interface ConversationListItemProps {
   conv: Conversation;
-  selectedConversationId: [string, string];
-  onSelectConversation: (id: string) => void;
+  selectedConversationId: [string, number?];
+  onSelectConversation: (conv: Conversation) => void;
 }
 
 function ConversationListItem({ conv, selectedConversationId, onSelectConversation } : ConversationListItemProps) {

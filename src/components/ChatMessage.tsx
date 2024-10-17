@@ -59,7 +59,9 @@ const ChatMessage: React.FC = ({id}: {id: string}) => {
     updateId = true
     clearMessage()
     setHasMore(true);
-    doFetch();
+    if(id !== '0') {
+      doFetch();
+    } // else new conversation
   }, [id]);
   useEffect(() => {
     // new message notify

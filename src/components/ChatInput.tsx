@@ -10,17 +10,17 @@ import {Conversation} from "@/types/Conversation.ts";
 
 const ChatInput = ({conversation}: { conversation: Conversation}) => {
 
-  const messagesInst = useAtomInstance(messageState).exports
+  const {sendMessage} = useAtomInstance(messageState).exports
   const [newMessage, setNewMessage] = useState('');
   const isSendable = useMemo(() => newMessage.trim().length === 0, [newMessage]);
 
-  const sendMessage = () => {
+  const onSendMessage = () => {
     const params: TextMessage = {
       messageType: 'text',
       messageContent: newMessage,
     }
     setNewMessage('')
-    messagesInst.sendMessage(params, conversation)
+    sendMessage(params, conversation)
   }
 
   return (
@@ -31,15 +31,15 @@ const ChatInput = ({conversation}: { conversation: Conversation}) => {
             onKeyPress={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                sendMessage();
+                onSendMessage();
               }
             }}
             placeholder="Type a message..."
             className="mb-2"
         />
         <div className="flex justify-end space-x-2">
-          {conversation.lastMessageChannel !== 'web' && <TemplateList/>}
-          <Button onClick={sendMessage} disabled={isSendable}>
+          {conversation.channel !== 'web' && <TemplateList/>}
+          <Button onClick={onSendMessage} disabled={isSendable}>
             Send
           </Button>
         </div>

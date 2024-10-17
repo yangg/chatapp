@@ -2,12 +2,12 @@
 
 
 type WebConversation = {
-  lastMessageChannel: 'web',
+  channel: 'web',
   webClientSenderId: string
 }
 
 type WhatsappCloudApiConversation = {
-  lastMessageChannel: 'whatsappcloudapi'
+  channel: 'whatsappcloudapi'
   userIdentityId: string
 }
 

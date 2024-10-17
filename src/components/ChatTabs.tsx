@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 
 import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs';
 import {Conversation} from '../types/Conversation.ts';
@@ -18,16 +18,20 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
     if (conversation.tabs) {
       return conversation.tabs
     }
-    return [conversation.lastMessageChannel === 'web' ? 'WebChat' : 'WhatsApp']
+    return [{id: conversation.conversationId, label: conversation.channel === 'web' ? 'WebChat' : 'WhatsApp'}]
   }, [conversation])
   const [renderedTabs, setRenderedTabs] = useState<Set<string>>(new Set([conversation.conversationId]));
+  useEffect(() => {
+    console.log(11, conversation)
+    setRenderedTabs(new Set([conversation.conversationId]))
+  }, [conversation]);
   console.log('renderTabs', renderedTabs)
   return (
       <>
         <Tabs value={conversation.conversationId} className='flex-1 flex flex-col'
               onValueChange={(value) => {
-                setSelectedConversationId([selectedConversationId[0], +value])
-                setRenderedTabs(prev => prev.add(value))
+                setSelectedConversationId([selectedConversationId[0], tabs.findIndex(x => x.id === value)])
+                setRenderedTabs(prev => new Set([...prev, value]))
               }}>
           <div className="flex justify-center mt-4">
             <TabsList className="justify-center">
