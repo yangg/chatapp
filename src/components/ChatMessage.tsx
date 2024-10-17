@@ -14,7 +14,7 @@ type getMessageListParams = {
 }
 
 
-const ChatMessage: React.FC = () => {
+const ChatMessage: React.FC = ({id}: {id: string}) => {
   const selectedConversation = useAtomSelector(getSelectedConversation)!;
   let updateId = false
 
@@ -34,11 +34,11 @@ const ChatMessage: React.FC = () => {
     }
   });
 
-  const [messages, {appendMessage, prependMessage, clearMessage}] = useAtomState(messageState);
+  const [messages, {appendMessage, prependMessage, clearMessage}] = useAtomState(messageState, [id]);
   const [hasMore, setHasMore] = useState(true);
   const [state, doFetch] = useAsyncFn(async (params: getMessageListParams = {}, prepend = false) => {
     params.limit = params.limit || 10
-    const {data} = await axios.get('/sleekflow/conversation/message/' + selectedConversation.conversationId, {
+    const {data} = await axios.get('/sleekflow/conversation/message/' + id, {
       params
     });
 
@@ -52,33 +52,33 @@ const ChatMessage: React.FC = () => {
     } else {
       prependMessage(data);
     }
-  }, [selectedConversation.conversationId, hasMore, messages]);
+  }, [id, hasMore, messages]);
 
   useEffect(() => {
-    console.log('Messages for: ', selectedConversation.conversationId, selectedConversation.title);
+    console.log('Messages for: ', id, selectedConversation.title);
     updateId = true
     clearMessage()
     setHasMore(true);
     doFetch();
-  }, [selectedConversation.conversationId]);
+  }, [id]);
   useEffect(() => {
     // new message notify
-    if(!updateId) {
-      console.log('New Message')
+    if(!updateId && selectedConversation.conversationId === id) {
+      console.log('New Message', id)
       doFetch({
         limit: 100,
         startTimeStamp: Math.min(messages[0]?.timestamp, Math.floor(Date.now()/1000) - 60) // 60s 内防止消息丢失
       }, true)
     }
-  }, [selectedConversation]);
+  }, [selectedConversation, id]);
 
   const loadNext = useCallback(() => {
     // 如果减去 1 秒有丢消息情况，可以不减，然后合并时去除重复的。
-    doFetch({endTimeStamp: messages[messages.length - 1].timestamp - 1});
+    doFetch(messages.length ? {endTimeStamp: messages[messages.length - 1].timestamp - 1} : {});
   }, [messages, doFetch]);
 
 
-  console.log(messages, messages.map((m) => m.id))
+  console.log('M rerender', id, messages.length)
   return (
       <div ref={containerRef}
            className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">
@@ -90,4 +90,4 @@ const ChatMessage: React.FC = () => {
   ;
 };
 
-export default ChatMessage;
+export default React.memo(ChatMessage);

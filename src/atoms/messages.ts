@@ -3,15 +3,13 @@ import {
   injectStore,
   api,
   injectCallback,
-  injectAtomSelector,
 } from "@zedux/react";
 import {Message, NewMessage, TextMessage, TemplateMessage} from "@/types/Message.ts";
 import axios from "axios";
 import {Conversation} from "@/types/Conversation.ts";
-import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
 
 
-export const messageState = atom('messages', () => {
+export const messageState = atom('messages', (_id: string) => {
   const store = injectStore<Message[]>([])
   // cannot get update atom selector here, so pass as a parameter in sendMessage
   // const conversation = injectAtomSelector(getSelectedConversation)
@@ -65,4 +63,4 @@ export const messageState = atom('messages', () => {
     sendMessage,
     setState: store.setState,
   })
-})
+}, { ttl: 0})
