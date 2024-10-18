@@ -22,7 +22,7 @@ import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
 
 const TemplateList: React.FC = () => {
   const selectedConversation = useAtomSelector(getSelectedConversation)!;
-  const messagesInst = useAtomInstance(messageState).exports
+  const {sendMessage} = useAtomInstance(messageState, [selectedConversation.conversationId]).exports
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -78,7 +78,7 @@ const TemplateList: React.FC = () => {
       }
       return acc
     }, [] )
-    messagesInst.sendMessage({
+    sendMessage({
       messageType: 'template',
       extendedMessage: {
         "WhatsappCloudApiTemplateMessageObject": {
@@ -110,56 +110,53 @@ const TemplateList: React.FC = () => {
         <DialogTrigger asChild>
           <Button variant="outline">Choose Template</Button>
         </DialogTrigger>
-        <DialogOverlay className={"z-[2001]"}></DialogOverlay>
-        <DialogPortal container={container}>
-          <DialogContent className="sm:max-w-[800px] z-[2002]">
-            <DialogHeader>
-              <DialogTitle>Choose Template</DialogTitle>
-              <DialogDescription></DialogDescription>
-            </DialogHeader>
-            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-              <TabsList>
-                <TabsTrigger value="">All</TabsTrigger>
-                {categories.map(category => (
-                    <TabsTrigger key={category} value={category}>
-                      {category}
-                    </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-            <div className="grid grid-cols-3 gap-4 py-2 overflow-y-auto max-h-[600px] px-[2px]">
-              {filteredTemplates.map(template => (
-                  <div
-                      key={template.id}
-                      className={`p-4 rounded-md border cursor-pointer transition-colors relative ${
-                          selectedTemplate === template.id
-                              ? 'border-transparent outline outline-primary'
-                              : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => selectTemplate(template.id)}
-                  >
-                    {/*<Star
-                className={`absolute top-4 right-4 size-5 transition-colors ${
-                  template.isStarred ? 'text-yellow-400' : 'text-gray-400'
-                }`}
-                fill={template.isStarred ? 'currentColor': 'none'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleStar(template.id);
-                }}
-              />*/}
-                    <h3 className="mb-2 pr-6">{template.name}</h3>
-                    <p className="text-xs text-gray-500 mb-2">{template.category}</p>
-                    <Separator className="mb-2"/>
-                    <WhatsAppComponents components={template.components}/>
-                  </div>
+        <DialogContent className="sm:max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>Choose Template</DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+          <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+            <TabsList>
+              <TabsTrigger value="">All</TabsTrigger>
+              {categories.map(category => (
+                  <TabsTrigger key={category} value={category}>
+                    {category}
+                  </TabsTrigger>
               ))}
-            </div>
-            <DialogFooter>
-              <Button onClick={handleSend} disabled={!selectedTemplate}>Send</Button>
-            </DialogFooter>
-          </DialogContent>
-        </DialogPortal>
+            </TabsList>
+          </Tabs>
+          <div className="grid grid-cols-3 gap-4 py-2 overflow-y-auto max-h-[600px] px-[2px]">
+            {filteredTemplates.map(template => (
+                <div
+                    key={template.id}
+                    className={`p-4 rounded-md border cursor-pointer transition-colors relative ${
+                        selectedTemplate === template.id
+                            ? 'border-transparent outline outline-primary'
+                            : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => selectTemplate(template.id)}
+                >
+                  {/*<Star
+              className={`absolute top-4 right-4 size-5 transition-colors ${
+                template.isStarred ? 'text-yellow-400' : 'text-gray-400'
+              }`}
+              fill={template.isStarred ? 'currentColor': 'none'}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleStar(template.id);
+              }}
+            />*/}
+                  <h3 className="mb-2 pr-6">{template.name}</h3>
+                  <p className="text-xs text-gray-500 mb-2">{template.category}</p>
+                  <Separator className="mb-2"/>
+                  <WhatsAppComponents components={template.components}/>
+                </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSend} disabled={!selectedTemplate}>Send</Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
   );
 };

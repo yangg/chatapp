@@ -58,7 +58,7 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
                       <CircleAlert className="ml-1 size-4 text-destructive"/>
                     </TooltipTrigger>
                     <TooltipContent className={"bg-accent text-destructive"}>
-                      {message.channelStatusMessage}
+                      {message.meta.channelStatusMessage}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>

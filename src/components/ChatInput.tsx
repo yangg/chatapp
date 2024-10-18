@@ -10,7 +10,7 @@ import {Conversation} from "@/types/Conversation.ts";
 
 const ChatInput = ({conversation}: { conversation: Conversation}) => {
 
-  const {sendMessage} = useAtomInstance(messageState).exports
+  const {sendMessage} = useAtomInstance(messageState, [conversation.conversationId]).exports
   const [newMessage, setNewMessage] = useState('');
   const isSendable = useMemo(() => newMessage.trim().length === 0, [newMessage]);
 

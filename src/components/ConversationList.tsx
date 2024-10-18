@@ -24,24 +24,21 @@ const ConversationList: React.FC = () => {
   const [selectedConversationTypeId, setSelectedConversationTypeId] = useAtomState(selectedConversationTypeIdState)
   const selectedConversationType = useAtomSelector(getSelectedConversationType)
   const [hasMore, setHasMore] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [state, loadNext] = useAsyncFn(async (page = currentPage) => {
+  const [state, loadConversation] = useAsyncFn(async (modifiedAt = '') => {
     const limit = 10
     const {data} = await axios.get('/sleekflow/conversation', {
       params: {
         limit,
-        offset: page * limit,
+        modifiedAt,
         getData: selectedConversationType.getData
       },
     })
     appendConversation(data)
     if(data.length < limit) {
       setHasMore(false);
-    } else {
-      setCurrentPage(currentPage + 1);
     }
     return
-  }, [currentPage, selectedConversationType]);
+  }, [selectedConversationType]);
 
 
   function onTypeChange(value) {
@@ -56,15 +53,19 @@ const ConversationList: React.FC = () => {
     console.log('fetching conversations', selectedConversationTypeId);
     setHasMore(true)
     clearConversation();
-    setCurrentPage(0)
     setSelectedConversationId([''])
-    loadNext(0)
+    loadConversation('')
   }, [selectedConversationTypeId]);
   useEffect(() => {
     if (!selectedConversationId[0] && conversations.length > 0) {
       selectConversation(conversations[0]);
     }
   }, [conversations])
+
+  const loadNext = useCallback(() => {
+    // 如果减去 1 秒有丢消息情况，可以不减，然后合并时去除重复的。
+    loadConversation(conversations.length ? conversations[conversations.length - 1].modifiedAt: '');
+  }, [conversations]);
 
   return (
       <div className="flex flex-col h-full">

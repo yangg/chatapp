@@ -1,6 +1,6 @@
 import {atom, AtomGetters} from "@zedux/react";
 
-export const selectedConversationTypeIdState = atom('selectedConversationType', "File Message")
+export const selectedConversationTypeIdState = atom('selectedConversationType', "General")
 
 export const conversationTypesState = atom('conversationTypes', [{
   title: 'General'

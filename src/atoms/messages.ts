@@ -18,11 +18,11 @@ export const messageState = atom('messages', (_id: string) => {
     return store.setState((state) => [...state, ...items])
   }
 
-  const prependMessage = (items: Message[]) => {
-    const newIds = items.reduce((acc, item) => (acc[item.id] = 1, acc), {} as Record<string, 1>)
+  const prependMessage = (newItems: Message[]) => {
+    const newIds = newItems.reduce((acc, item) => (acc[item.id] = 1, acc), {} as Record<string, 1>)
     return store.setState((state) => {
-      const removeUpdatedState = state.filter(item => !newIds[item.id])
-      return [...items, ...removeUpdatedState]
+      const removeDuplicated = state.filter(item => !newIds[item.id])
+      return [...newItems, ...removeDuplicated]
     })
   }
 
@@ -33,7 +33,7 @@ export const messageState = atom('messages', (_id: string) => {
       ...newMessage,
       ...(channel === 'web' ? {
         channel,
-        webClientSenderId: conversation.webClientSenderId,
+        webClientSenderId: conversation.userIdentityId,
       }: {
         channel,
         from: conversation.channelIdentityId,
