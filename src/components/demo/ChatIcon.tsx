@@ -13,7 +13,7 @@ export default function ChatIcon({ themeColor }) {
   useEffect(() => {
     async function getUnread() {
       const token = (document.cookie.match(/Token=([^;]+)/) || [0, ''])[1]
-      const res = await fetch('http://localhost:6003/sleekflow/unread', {
+      const res = await fetch('https://chat-api.17ch.cn/sleekflow/unread', {
         headers: {
           Authorization: `Bearer ${token}`
         }
