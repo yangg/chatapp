@@ -6,15 +6,26 @@ import ChatApp from './ChatApp'
 
 
 
-export default function ChatIcon() {
+export default function ChatIcon({ themeColor }) {
   const [unreadCount, setUnreadCount] = useState(0)
   const [showChat, setShowChat] = useState(false)
 
   useEffect(() => {
-    // Simulating receiving new messages
-    const interval = setInterval(() => {
-      setUnreadCount((prev) => prev + 1)
-    }, 10000)
+    async function getUnread() {
+      const token = (document.cookie.match(/Token=([^;]+)/) || [0, ''])[1]
+      const res = await fetch('http://localhost:6003/sleekflow/unread', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      if(res.ok) {
+        const data = await res.json()
+        setUnreadCount(data.unreadCount)
+      }
+    }
+
+    const interval = setInterval(getUnread, 10000)
+    getUnread()
 
     return () => clearInterval(interval)
   }, [])
@@ -25,13 +36,12 @@ export default function ChatIcon() {
     } else {
       window.ChatApp.toggleChat()
     }
-    setUnreadCount(0)
   }
 
   // Memoize the ChatApp component
   const memoizedChatApp = useMemo(() => (
     <ChatApp />
-  ), [])
+  ), [themeColor])
 
   return (
     <>
@@ -40,7 +50,7 @@ export default function ChatIcon() {
           position: 'fixed',
           bottom: '1rem', // bottom-4
           right: '1rem', // right-4
-          backgroundColor: '#007bff', // bg-primary
+          backgroundColor: themeColor || '#007bff', // bg-primary
           color: 'white', // text-primary-foreground
           borderRadius: '9999px', // rounded-full
           padding: '0.75rem', // p-3
@@ -70,7 +80,7 @@ export default function ChatIcon() {
         )}
       </div>
       {showChat && (
-        <ShadowComponent>
+        <ShadowComponent themeColor={themeColor}>
           {memoizedChatApp}
         </ShadowComponent>
       )}

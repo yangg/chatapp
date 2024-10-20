@@ -6,10 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getPortalContainer() {
-  const shadowRoot = document.querySelectorAll('shadow-root-component')
+  const shadowDOM = document.querySelector('shadow-root-component')
   let container
-  if(shadowRoot.length) {
-    container = shadowRoot[0].shadowRoot!.lastElementChild
+  if(shadowDOM) {
+    container = shadowDOM.shadowRoot!.lastElementChild
     // const id = 'shadow-portal-root'
     // container = target.getElementById(id);
     // if(!container) {

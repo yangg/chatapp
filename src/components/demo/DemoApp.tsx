@@ -16,16 +16,18 @@ function App() {
   return (
     <>
       <div>
+
+        <ChatIcon themeColor={'#77d916'}/>
+
+
         <h3>Main app h3</h3>
 
+        <Button onClick={() => setCount(count + 1)}>Increment</Button>
+        <p>Count: {count}</p>
         <ShadowComponent>
           <style>{styles}</style>
           <h3>subapp h3: inside Shadow DOM1</h3>
         </ShadowComponent>
-        <Button onClick={() => setCount(count + 1)}>Increment</Button>
-        <p>Count: {count}</p>
-
-        <ChatIcon />
       </div>
     </>
   );

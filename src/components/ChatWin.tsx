@@ -28,12 +28,12 @@ function ChatWin() {
       setIsConnected(false);
     }
 
-    function onConversation(value: Conversation[]) {
-      console.log('conv', value)
+    function onConversation({ unreadCount, list }: { unreadCount: number, list: Conversation[] } ) {
+      console.log('conv', list)
       if(!selectedConversation.tabs) {
-        prependConversation(value)
+        prependConversation(list)
       } else {
-        mergeConversationToContacts(value)
+        mergeConversationToContacts(list)
       }
     }
 
