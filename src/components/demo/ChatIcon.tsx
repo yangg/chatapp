@@ -41,7 +41,7 @@ export default function ChatIcon({ themeColor }) {
   // Memoize the ChatApp component
   const memoizedChatApp = useMemo(() => (
     <ChatApp />
-  ), [themeColor])
+  ), [])
 
   return (
     <>

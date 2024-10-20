@@ -15,7 +15,7 @@ export const getSelectedConversation = ({get}: AtomGetters) => {
   if(conv.contacts) {
     return {
       ...conv.contacts[idx],
-      tabs: conv.contacts.map(c => ({label: `WhatsApp (${c.relation})`, id: c.conversationId}))
+      tabs: conv.contacts.map(c => ({label: `WhatsApp (${c.relation})`, id: c.conversationId, unreadCount: c.unreadCount}))
     }
   }
   return conv

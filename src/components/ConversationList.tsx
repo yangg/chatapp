@@ -109,11 +109,11 @@ function ConversationListItem({ conv, selectedConversationId, onSelectConversati
           >
             <Avatar className="size-8 mr-4">
               <AvatarFallback
-                  className="bg-primary text-white">{getInitials(conv.title)}</AvatarFallback>
+                  className="bg-primary text-white">{getInitials(conv.name)}</AvatarFallback>
             </Avatar>
             <div className="text-left flex-1">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium truncate">{conv.title}</p>
+                <p className="text-sm font-medium truncate">{conv.name}</p>
                 {conv.unreadCount > 0 && (
                     <Badge variant="destructive">
                       {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
@@ -124,7 +124,7 @@ function ConversationListItem({ conv, selectedConversationId, onSelectConversati
               {conv.contacts && <div className="flex flex-wrap gap-1">
                 {conv.contacts.map((item, index) => (
                     <Badge variant='outline' key={index} className="rounded-full">
-                  {item.displayName}
+                  {item.name}
                 </Badge>
                 ))}
               </div>}
