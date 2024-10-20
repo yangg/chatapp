@@ -114,16 +114,16 @@ function ConversationListItem({ conv, selectedConversationId, onSelectConversati
             <div className="text-left flex-1">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium truncate">{conv.title}</p>
-                {conv.unreadMessageCount > 0 && (
+                {conv.unreadCount > 0 && (
                     <Badge variant="destructive">
-                      {conv.unreadMessageCount > 99 ? '99+' : conv.unreadMessageCount}
+                      {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
                     </Badge>
                 )}
               </div>
               {/*<p className="text-xs text-muted-foreground truncate">{conv.lastMessage || 'hello'}</p>*/}
               {conv.contacts && <div className="flex flex-wrap gap-1">
                 {conv.contacts.map((item, index) => (
-                    <Badge variant={'outline'} key={index} className="rounded-full">
+                    <Badge variant='outline' key={index} className="rounded-full">
                   {item.displayName}
                 </Badge>
                 ))}

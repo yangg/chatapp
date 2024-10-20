@@ -8,14 +8,12 @@ import {socket} from "@/lib/socket.ts";
 import {useAtomInstance, useAtomSelector} from "@zedux/react";
 import {conversationsState} from "@/atoms/conversations.ts";
 import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
-import {getSelectedConversationType} from "@/atoms/conversationTypes.ts";
 
 
 // ... existing code ...
 
 function ChatWin() {
   const selectedConversation = useAtomSelector(getSelectedConversation);
-  const selectedConversationType = useAtomSelector(getSelectedConversationType);
   const {prependConversation, mergeConversationToContacts} = useAtomInstance(conversationsState).exports
 
 
@@ -32,7 +30,7 @@ function ChatWin() {
 
     function onConversation(value: Conversation[]) {
       console.log('conv', value)
-      if(!selectedConversationType.getData) {
+      if(!selectedConversation.tabs) {
         prependConversation(value)
       } else {
         mergeConversationToContacts(value)
@@ -48,7 +46,7 @@ function ChatWin() {
       socket.off('disconnect', onDisconnect);
       socket.off('conversation', onConversation);
     };
-  }, []);
+  }, [selectedConversation]);
 
 
   return (

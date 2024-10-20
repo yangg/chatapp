@@ -25,26 +25,58 @@ export const conversationsState = atom('conversation', () => {
         if(!needUpdated) {
           return c
         }
-        let modifiedAts = []
-        const newItem = {
-          ...c,
-          // modifiedAt: needUpdatedItems[c.conversationId],
-          contacts: c.contacts.map(x => {
-            if(x.userIdentityId in updatedObjects) {
-              const updatedItem = updatedObjects[x.userIdentityId]
-              modifiedAts.push(updatedItem.modifiedAt)
-              return {
-                ...x,
-                conversationId: updatedItem.conversationId,
-              }
+        const modifiedAts = []
+        const newContacts = c.contacts.map(x => {
+          if(x.userIdentityId in updatedObjects) {
+            const updatedItem = updatedObjects[x.userIdentityId]
+            modifiedAts.push(updatedItem.modifiedAt)
+            return {
+              ...x,
+              ...updatedItem,
             }
-            return x
-          }),
+          }
+          return x
+        })
+        return  {
+          ...c,
+          contacts: newContacts,
+          unreadCount: newContacts.reduce((sum, c) => sum + c.unreadCount, 0),
           modifiedAt: modifiedAts.reduce((max, c) => c > max ?  c : max) // max modifiedAt
         }
-        return newItem
       })
       return newState
+    })
+  }
+
+  const setRead = (selectedConversationId: [string, number?]) => {
+    const [id, idx = 0] = selectedConversationId
+    return store.setState((state) => {
+      return state.map(c => {
+        if(c.conversationId !== id) {
+          return c
+        }
+        if(!c.contacts) {
+          return {
+            ...c,
+            unreadCount: 0
+          }
+        }
+        let unreadCount = 0
+        return {
+          ...c,
+          contacts: c.contacts.map((x, i) => {
+            if(i !== idx) {
+              return x
+            }
+            unreadCount = x.unreadCount
+            return {
+              ...x,
+              unreadCount: 0
+            }
+          }),
+          unreadCount: c.unreadCount - unreadCount
+        }
+      })
     })
   }
 
@@ -52,6 +84,7 @@ export const conversationsState = atom('conversation', () => {
     appendConversation,
     prependConversation,
     mergeConversationToContacts,
-    clearConversation: () => store.setState([])
+    clearConversation: () => store.setState([]),
+    setRead,
   })
 })

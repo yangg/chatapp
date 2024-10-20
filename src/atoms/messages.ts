@@ -45,7 +45,7 @@ export const messageState = atom('messages', (_id: string) => {
     prependMessage([
       {
         ...message,
-        isSentFromSleekflow: true,
+        isOurs: true,
         updatedAt: new Date().toISOString(),
         status: 'Sending',
         timestamp: Math.floor(newMessageId / 1000),
@@ -53,7 +53,7 @@ export const messageState = atom('messages', (_id: string) => {
       },
     ])
     const {data} = await axios.post('/sleekflow/message', message);
-    store.setState(prevMessages => prevMessages.map(x => x.id === newMessageId ? {...message, ...data} : x))
+    store.setState(prevMessages => prevMessages.map(x => x.id === newMessageId ? {...x, ...data} : x))
   })
 
   return api(store).setExports({

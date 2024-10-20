@@ -22,10 +22,9 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
   }, [conversation])
   const [renderedTabs, setRenderedTabs] = useState<Set<string>>(new Set([conversation.conversationId]));
   useEffect(() => {
-    console.log(11, conversation)
     setRenderedTabs(new Set([conversation.conversationId]))
   }, [conversation]);
-  console.log('renderTabs', renderedTabs)
+  // console.log('renderTabs', renderedTabs)
   return (
       <>
         <Tabs value={conversation.conversationId} className='flex-1 flex flex-col'

@@ -11,26 +11,17 @@ interface ChatMessageItemProps {
   message: Message;
 }
 
-function getSenderName(message: Message) {
-  switch (message.channel) {
-    case 'web':
-      return message.webClientSender?.name;
-    case 'whatsappcloudapi':
-      return message.dynamicChannelSender?.userDisplayName;
-    default:
-      return '';
-  }
-}
+
 
 export default function ChatMessageItem({message}: ChatMessageItemProps) {
-  const isSender = message.channel === 'web' ? message.isSentFromSleekflow : message.from === message.channelIdentityId;
+  const isOurs = message.isOurs
   return (
       <div
-          className={`flex mb-4 ${isSender ? "justify-end" : "justify-start"}`}
+          className={`flex mb-4 ${isOurs ? "justify-end" : "justify-start"}`}
       >
         <div
             className={`max-w-[70%] min-w-[150px] p-3 rounded-lg ${
-                isSender ? "bg-primary text-primary-foreground" : "bg-muted"
+                isOurs ? "bg-primary text-primary-foreground" : "bg-muted"
             }`}
         >
           {message.messageType === 'file'
@@ -41,17 +32,17 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
                   :
                   <div className="text-sm" dangerouslySetInnerHTML={{__html: markdownToHtml(message.messageContent)}}/>
           }
-          <div className={`text-xs text-muted-foreground mt-1 flex items-center  ${isSender ? "justify-end" : ""} `}>
-            {!isSender && <span
-              className="mr-1">{getSenderName(message)}</span>}
+          <div className={`text-xs text-muted-foreground mt-1 flex items-center  ${isOurs ? "justify-end" : ""} `}>
+            {!isOurs && <span
+              className="mr-1">{message.name}</span>}
             <span>{formatTime(message.updatedAt)}</span>
-            {isSender && message.status === 'Read' && (
+            {isOurs && message.status === 'Read' && (
                 <CheckCheck className="ml-1 size-4"/>
             )}
-            {isSender && message.status === 'Sending' && (
+            {isOurs && message.status === 'Sending' && (
                 <Clock3 className="ml-1 size-4"/>
             )}
-            {isSender && message.status === 'Failed' && (
+            {isOurs && message.status === 'Failed' && (
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -63,7 +54,7 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
                   </Tooltip>
                 </TooltipProvider>
             )}
-            {isSender && (message.status === 'Received' || message.status === 'Sent') && (
+            {isOurs && (message.status === 'Received' || message.status === 'Sent') && (
                 <MessageSquareDot className="ml-1 size-4"/>
             )}
           </div>

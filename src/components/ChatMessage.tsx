@@ -2,19 +2,22 @@ import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from '
 import ChatMessageItem from "@/components/ChatMessageItem.tsx";
 import {useAsyncFn} from "react-use";
 import axios from "axios";
-import {useAtomSelector, useAtomState} from "@zedux/react";
-import {getSelectedConversation} from "@/atoms/selectedConversation.ts";
+import {useAtomInstance, useAtomSelector, useAtomState, useAtomValue} from "@zedux/react";
+import {getSelectedConversation, selectedConversationIdState} from "@/atoms/selectedConversation.ts";
 import {messageState} from "@/atoms/messages.ts";
 import InfiniteScroll from "@/components/InfiniteScroll.tsx";
+import {conversationsState} from "@/atoms/conversations.ts";
 
 type getMessageListParams = {
-  endTimeStamp?: number
-  startTimeStamp?: number
+  endTimestamp?: number
+  startTimestamp?: number
   limit?: number
 }
 
 
 const ChatMessage: React.FC = ({id}: {id: string}) => {
+  const selectedConversationId = useAtomValue(selectedConversationIdState);
+  const {setRead} = useAtomInstance(conversationsState).exports
   const selectedConversation = useAtomSelector(getSelectedConversation)!;
   let updateId = false
 
@@ -60,27 +63,32 @@ const ChatMessage: React.FC = ({id}: {id: string}) => {
     clearMessage()
     setHasMore(true);
     if(id !== '0') {
-      doFetch();
+      (async () => {
+        await doFetch();
+        selectedConversation.unreadCount && setRead(selectedConversationId)
+      })()
     } // else new conversation
   }, [id]);
   useEffect(() => {
     // new message notify
     if(!updateId && selectedConversation.conversationId === id) {
-      console.log('New Message', id)
-      doFetch({
-        limit: 100,
-        startTimeStamp: Math.min(messages[0]?.timestamp, Math.floor(Date.now()/1000) - 60) // 60s 内防止消息丢失
-      }, true)
+      console.log('New Message', id);
+      (async () => {
+        await doFetch({
+          limit: 100,
+          startTimestamp: Math.min(...[Math.floor(Date.now()/1000) - 60].concat(messages.length ? messages[0].timestamp : [])) // 60s 内防止消息丢失
+        }, true)
+        selectedConversation.unreadCount && setRead(selectedConversationId)
+      })()
     }
-  }, [selectedConversation, id]);
+  }, [selectedConversation.modifiedAt, id]);
 
   const loadNext = useCallback(() => {
-    // 如果减去 1 秒有丢消息情况，可以不减，然后合并时去除重复的。
-    doFetch(messages.length ? {endTimeStamp: messages[messages.length - 1].timestamp - 1} : {});
+    doFetch(messages.length ? {endTimestamp: messages[messages.length - 1].timestamp} : {});
   }, [messages, doFetch]);
 
 
-  console.log('M rerender', id, messages.length)
+  // console.log('M rerender', id, messages.length)
   return (
       <div ref={containerRef}
            className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">
