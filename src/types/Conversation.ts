@@ -10,6 +10,7 @@ type WhatsappCloudApiConversation = {
   channel: 'whatsappcloudapi'
   userIdentityId: string
   channelIdentityId: string
+  lastContactFromCustomers: string
 }
 
 export type Conversation = {

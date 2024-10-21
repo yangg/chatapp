@@ -7,6 +7,8 @@ import {getSelectedConversation, selectedConversationIdState} from "@/atoms/sele
 import {messageState} from "@/atoms/messages.ts";
 import InfiniteScroll from "@/components/InfiniteScroll.tsx";
 import {conversationsState} from "@/atoms/conversations.ts";
+import {AlarmClock} from "lucide-react";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";
 
 type getMessageListParams = {
   endTimestamp?: number
@@ -87,11 +89,20 @@ const ChatMessage: React.FC = ({id}: {id: string}) => {
     doFetch(messages.length ? {endTimestamp: messages[messages.length - 1].timestamp} : {});
   }, [messages, doFetch]);
 
+  const showWarnTemplate = selectedConversation.lastContactFromCustomers && (Date.now() - new Date(selectedConversation.lastContactFromCustomers) >= 24*3600*1000)
+
 
   // console.log('M rerender', id, messages.length)
   return (
       <div ref={containerRef}
            className="absolute top-0 left-0 right-0 bottom-0 overflow-y-auto p-4 pb-0 flex flex-col-reverse">
+        {showWarnTemplate && <Alert variant={'warning'}>
+          <AlarmClock className="h-4 w-4" />
+          <AlertTitle>Warning</AlertTitle>
+          <AlertDescription>
+            Use Whatsapp template to send your frst message after the 24-hour conversation window
+          </AlertDescription>
+        </Alert>}
         <div className="flex-1"></div>
         {messages.map((message) => <ChatMessageItem key={message.id} message={message}/>)}
         <InfiniteScroll error={state.error} loading={state.loading} loadNext={loadNext} hasMore={hasMore} initialized={messages.length > 0}/>

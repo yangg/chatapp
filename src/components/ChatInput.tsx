@@ -12,7 +12,9 @@ const ChatInput = ({conversation}: { conversation: Conversation}) => {
 
   const {sendMessage} = useAtomInstance(messageState, [conversation.conversationId]).exports
   const [newMessage, setNewMessage] = useState('');
-  const isSendable = useMemo(() => newMessage.trim().length === 0, [newMessage]);
+  const isSendable = useMemo(() => {
+    return newMessage.length > 0 && (conversation.lastContactFromCustomers ? (Date.now() - new Date(conversation.lastContactFromCustomers) < 24*3600*1000) : true)
+  }, [newMessage, conversation.lastContactFromCustomers]);
 
   const onSendMessage = () => {
     const params: TextMessage = {
@@ -39,7 +41,7 @@ const ChatInput = ({conversation}: { conversation: Conversation}) => {
         />
         <div className="flex justify-end space-x-2">
           {conversation.channel !== 'web' && <TemplateList/>}
-          <Button onClick={onSendMessage} disabled={isSendable}>
+          <Button onClick={onSendMessage} disabled={!isSendable}>
             Send
           </Button>
         </div>
