@@ -37,7 +37,7 @@ const ChatTabs: React.FC<ChatMessageProps> = ({conversation}) => {
           <TabsList className="justify-center">
             {tabs.map((tab) => (<TabsTrigger value={tab.id} key={tab.id} className={'relative'}>
               {tab.label}
-              {tabs.length > 1 && tab.unreadCount > 0 && <Badge variant="destructive" className={'absolute -top-3 -right-3'}>
+              {tabs.length > 1 && tab.unreadCount > 0 && <Badge variant="unread" className={'absolute -top-2 -right-2'}>
                 {tab.unreadCount > 99 ? '99+' : tab.unreadCount}
               </Badge>
               }

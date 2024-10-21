@@ -9,7 +9,7 @@ import axios from 'axios';
 import {useAtomSelector, useAtomState} from "@zedux/react";
 import {conversationsState} from "@/atoms/conversations.ts";
 import {selectedConversationIdState} from "@/atoms/selectedConversation.ts";
-import InfiniteScroll from "@/components/InfiniteScroll.tsx";
+import InfiniteScroll from "@/components/common/InfiniteScroll.tsx";
 import {
   conversationTypesState,
   getSelectedConversationType,
@@ -102,23 +102,18 @@ function ConversationListItem({ conv, selectedConversationId, onSelectConversati
       (
           <button
               key={conv.conversationId}
-              className={`flex items-center w-full p-3 hover:bg-accent ${
+              className={`flex items-center p-3 hover:bg-accent ${
                   selectedConversationId[0] === conv.conversationId ? "bg-accent" : ""
               }`}
               onClick={() => onSelectConversation(conv)}
           >
-            <Avatar className="size-8 mr-4">
+            <Avatar className="size-8 mr-2 border-yellow-50 border">
               <AvatarFallback
                   className="bg-primary text-white">{getInitials(conv.name)}</AvatarFallback>
             </Avatar>
-            <div className="text-left flex-1">
+            <div className="text-left flex-1 overflow-hidden">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium truncate">{conv.name}</p>
-                {conv.unreadCount > 0 && (
-                    <Badge variant="destructive">
-                      {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
-                    </Badge>
-                )}
               </div>
               {/*<p className="text-xs text-muted-foreground truncate">{conv.lastMessage || 'hello'}</p>*/}
               {conv.contacts && <div className="flex flex-wrap gap-1">
@@ -129,6 +124,11 @@ function ConversationListItem({ conv, selectedConversationId, onSelectConversati
                 ))}
               </div>}
             </div>
+            {conv.unreadCount > 0 && (
+                <Badge variant="unread">
+                  {conv.unreadCount > 99 ? '99+' : conv.unreadCount}
+                </Badge>
+            )}
           </button>
       )
   )

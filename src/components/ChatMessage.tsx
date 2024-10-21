@@ -5,7 +5,7 @@ import axios from "axios";
 import {useAtomInstance, useAtomSelector, useAtomState, useAtomValue} from "@zedux/react";
 import {getSelectedConversation, selectedConversationIdState} from "@/atoms/selectedConversation.ts";
 import {messageState} from "@/atoms/messages.ts";
-import InfiniteScroll from "@/components/InfiniteScroll.tsx";
+import InfiniteScroll from "@/components/common/InfiniteScroll.tsx";
 import {conversationsState} from "@/atoms/conversations.ts";
 import {AlarmClock} from "lucide-react";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert.tsx";

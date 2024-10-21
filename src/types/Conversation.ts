@@ -17,4 +17,5 @@ export type Conversation = {
   conversationId: string
   name: string
   modifiedAt: string
+  unreadCount: number
 } & (WebConversation | WhatsappCloudApiConversation)
