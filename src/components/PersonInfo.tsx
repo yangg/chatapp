@@ -50,20 +50,19 @@ const PersonInfo = ({personInfo}) => {
         <Separator/>
 
         <div className="p-4">
-          {/* <h3 className="text-l mb-4">Contact Info</h3> */}
           <div className="space-y-3">
-            <div className="flex items-center">
+            <div className="flex items-center h-6 group">
               <Phone className="mr-2 text-muted-foreground size-4"/>
               <span className="text-sm">{personInfo.phoneNumber}
               </span>
-              {personInfo.phoneNumber && <Button className={'ml-1'} variant="ghost" size={'xsIcon'}
+              {personInfo.phoneNumber && <Button className={'ml-1 hidden group-hover:inline-flex'} variant="ghost" size={'xsIcon'}
                                                  onClick={() => copyToClipboard(personInfo.phoneNumber)}><ClipboardCopy
-                className=' text-muted-foreground size-4'/></Button>}
+                className='text-muted-foreground size-4'/></Button>}
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center h-6 group">
               <Mail className="mr-2 text-muted-foreground size-4"/>
               <span className="text-sm">{personInfo.email}</span>
-              {personInfo.email && <Button className={'ml-1'} variant="ghost" size={'xsIcon'}
+              {personInfo.email && <Button className={'ml-1 hidden group-hover:inline-flex'} variant="ghost" size={'xsIcon'}
                                            onClick={() => copyToClipboard(personInfo.email)}><ClipboardCopy
                 className=' text-muted-foreground size-4'/></Button>}
             </div>

@@ -31,7 +31,15 @@ const TemplateList: React.FC = () => {
   const [templates, setTemplates] = useState<WaTemplate[]>([]);
   const state = useAsync(async () => {
     const {data} = await axios.get('/sleekflow/template')
-    setTemplates(data.whatsappTemplates.filter(t => t.status === "APPROVED"))
+    setTemplates(data.whatsappTemplates.filter(t => {
+      if(t.status !== "APPROVED") {
+        return false
+      }
+      if(t.components.some(c => c.example || c.text?.includes('{{'))) {
+        return false
+      }
+      return true
+    }))
     return 1
   }, [])
 
