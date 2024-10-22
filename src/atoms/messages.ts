@@ -7,6 +7,7 @@ import {
 import {Message, NewMessage, TextMessage, TemplateMessage} from "@/types/Message.ts";
 import axios from "axios";
 import {Conversation} from "@/types/Conversation.ts";
+import {getImageWidth} from "@/lib/utils.ts";
 
 
 export const messageState = atom('messages', (_id: string) => {
@@ -27,7 +28,7 @@ export const messageState = atom('messages', (_id: string) => {
   }
 
   const sendMessage = injectCallback(async(newMessage: TextMessage | TemplateMessage, conversation: Conversation) => {
-    console.log('send', conversation.conversationId, conversation.title)
+    console.log('send', conversation.conversationId, conversation.name)
     const channel = conversation.channel
     const message: NewMessage = {
       ...newMessage,
@@ -42,9 +43,30 @@ export const messageState = atom('messages', (_id: string) => {
       })
     }
     const newMessageId = Date.now()
+
+    let files = null
+    if(message.files.length) {
+      files = await Promise.all(message.files.map(async x => {
+        const url = URL.createObjectURL(x)
+        let metadata
+        if(x.type.startsWith('image/')) {
+          metadata = {
+            width: await getImageWidth(url)
+          }
+        }
+        return {
+          fileId: x.name,
+          url,
+          mimeType: x.type,
+          filename: x.name,
+          metadata,
+        }
+      }))
+    }
     prependMessage([
       {
         ...message,
+        files,
         isOurs: true,
         updatedAt: new Date().toISOString(),
         status: 'Sending',
@@ -52,7 +74,20 @@ export const messageState = atom('messages', (_id: string) => {
         id: newMessageId,
       },
     ])
-    const {data} = await axios.post('/sleekflow/message', message);
+    let data
+    if(message.files.length) {
+      const formData = new FormData()
+      for(const x in message) {
+        if(x === 'files') {
+          message.files.forEach(file => formData.append('files', file))
+        } else {
+          formData.append(x, message[x])
+        }
+      }
+      ({data} = await axios.post(`/sleekflow/message/file`, formData))
+    } else {
+      ({data} = await axios.post(`/sleekflow/message`, message))
+    }
     store.setState(prevMessages => prevMessages.map(x => x.id === newMessageId ? {...x, ...data} : x))
   })
 

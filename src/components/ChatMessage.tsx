@@ -60,7 +60,7 @@ const ChatMessage: React.FC = ({id}: {id: string}) => {
   }, [id, hasMore, messages]);
 
   useEffect(() => {
-    console.log('Messages for: ', id, selectedConversation.title);
+    console.log('Messages for: ', id, selectedConversation.name);
     updateId = true
     clearMessage()
     setHasMore(true);

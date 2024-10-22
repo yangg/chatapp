@@ -13,9 +13,25 @@ interface WhatsappCloudApiMessage {
 }
 
 export interface TextMessage {
-  messageType: 'text'
+  messageType: 'text' | 'file'
   messageContent: string
+  files: File[]
 }
+
+export interface MessageFile {
+  filename: string,
+  url: string,
+  mimeType: string,
+  fileId: string,
+  metadata: {
+    width: number
+  }
+}
+
+// export interface FileMessage {
+//   messageType: 'file'
+//   files: File[]
+// }
 
 export interface TemplateMessage {
   messageType: 'template'

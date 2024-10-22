@@ -58,7 +58,7 @@ function ChatWin() {
             <ConversationList />
           </div>
 
-          <div className="flex-1 flex flex-col h-full">
+          <div className="flex-1 flex flex-col h-full overflow-x-hidden">
             {selectedConversation ? <ChatTabs
                 conversation={selectedConversation}
             /> : <div className="flex-1 flex items-center justify-center">Select a conversation</div>}

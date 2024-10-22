@@ -1,7 +1,9 @@
 import markdownToHtml from "@/lib/markdown.ts";
-import {CheckCheck, CircleAlert, Clock3, MessageSquareDot} from "lucide-react";
-import {Message} from "@/types/Message.ts";
+import {CheckCheck, CircleAlert, Clock3, MessageSquareDot, Paperclip} from "lucide-react";
+import {Message, MessageFile} from "@/types/Message.ts";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip.tsx";
+import {last} from "@/lib/utils.ts";
+import {Button} from "@/components/ui/button.tsx";
 
 const formatTime = (date: string) => {
   return new Date(date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
@@ -24,13 +26,9 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
                 isOurs ? "bg-primary text-primary-foreground" : "bg-muted"
             }`}
         >
-          {message.messageType === 'file'
-              ? <div>file</div>
-              : message.messageType === 'template'
-                  ? <div className="text-sm"
-                         dangerouslySetInnerHTML={{__html: markdownToHtml(message.messageContent || 'Template Sending...')}}/>
-                  :
-                  <div className="text-sm" dangerouslySetInnerHTML={{__html: markdownToHtml(message.messageContent)}}/>
+          {message.messageContent &&
+            <div className="text-sm" dangerouslySetInnerHTML={{__html: markdownToHtml(message.messageContent)}}/>}
+          {message.messageType === 'file' && <MessageFiles files={message.files}/>
           }
           <div className={`text-xs text-muted-foreground mt-1 flex items-center  ${isOurs ? "justify-end" : ""} `}>
             {!isOurs && <span
@@ -59,6 +57,28 @@ export default function ChatMessageItem({message}: ChatMessageItemProps) {
             )}
           </div>
         </div>
+      </div>
+  )
+}
+
+function MessageFiles({files}: { files: MessageFile[]}) {
+  return (
+      <div className={'space-y-3'}>
+        {files.map((file) => {
+          const name = last(file.filename.split('/'));
+          if(file.mimeType.includes('image/')) {
+            return (
+              <img loading="lazy" key={file.fileId} src={file.url} alt={name} title={name} style={{width: file.metadata.width}} />
+            )
+          } else {
+            return (
+                <button key={file.fileId} className={'flex text-sm items-center'}>
+                  <Paperclip className={'size-4 mr-1'}/>
+                  {name}
+                </button>
+            )
+          }
+        })}
       </div>
   )
 }

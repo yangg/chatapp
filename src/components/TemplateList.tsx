@@ -171,7 +171,7 @@ const TemplateList: React.FC = () => {
 
 function WhatsAppButtons({buttons}) {
   return buttons.map((b, i) => <Button key={i} variant="outline" size={'sm'}
-                             className={'w-full'}>{b.text}</Button>)
+                             className={'w-full mt-2'}>{b.text}</Button>)
 }
 
 function WhatsAppComponents({components}) {

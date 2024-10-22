@@ -27,3 +27,17 @@ export function getInitials(name: string) {
   return name.split(' ').slice(0, 2).map(n => n.charAt(0)).join('');
 }
 
+export function last(arr) {
+  if(!arr || !arr.length) return null
+  return arr[arr.length - 1]
+}
+
+export function getImageWidth(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img.width);
+    img.onerror = () => resolve(100);
+    img.src = url;
+  });
+}
+
