@@ -45,7 +45,7 @@ export const messageState = atom('messages', (_id: string) => {
     const newMessageId = Date.now()
 
     let files = null
-    if(message.files.length) {
+    if(message.files?.length) {
       files = await Promise.all(message.files.map(async x => {
         const url = URL.createObjectURL(x)
         let metadata
@@ -75,7 +75,7 @@ export const messageState = atom('messages', (_id: string) => {
       },
     ])
     let data
-    if(message.files.length) {
+    if(message.files?.length) {
       const formData = new FormData()
       for(const x in message) {
         if(x === 'files') {

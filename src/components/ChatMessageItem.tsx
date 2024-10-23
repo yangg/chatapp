@@ -72,7 +72,7 @@ function MessageFiles({files}: { files: MessageFile[]}) {
             )
           } else {
             return (
-                <button key={file.fileId} className={'flex text-sm items-center'}>
+                <button key={file.fileId} className={'flex text-sm items-center'} onClick={() => window.open(file.url)}>
                   <Paperclip className={'size-4 mr-1'}/>
                   {name}
                 </button>
