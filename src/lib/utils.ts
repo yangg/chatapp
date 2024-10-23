@@ -32,11 +32,11 @@ export function last(arr) {
   return arr[arr.length - 1]
 }
 
-export function getImageWidth(url) {
+export function getImageDimension(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve(img.width);
-    img.onerror = () => resolve(100);
+    img.onload = () => resolve({width: img.width, height: img.height});
+    img.onerror = () => resolve({width: 100, height: 100});
     img.src = url;
   });
 }

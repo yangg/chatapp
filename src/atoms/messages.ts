@@ -7,7 +7,7 @@ import {
 import {Message, NewMessage, TextMessage, TemplateMessage} from "@/types/Message.ts";
 import axios from "axios";
 import {Conversation} from "@/types/Conversation.ts";
-import {getImageWidth} from "@/lib/utils.ts";
+import {getImageDimension} from "@/lib/utils.ts";
 
 
 export const messageState = atom('messages', (_id: string) => {
@@ -50,9 +50,7 @@ export const messageState = atom('messages', (_id: string) => {
         const url = URL.createObjectURL(x)
         let metadata
         if(x.type.startsWith('image/')) {
-          metadata = {
-            width: await getImageWidth(url)
-          }
+          metadata = await getImageDimension(url)
         }
         return {
           fileId: x.name,

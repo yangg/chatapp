@@ -68,7 +68,7 @@ function MessageFiles({files}: { files: MessageFile[]}) {
           const name = last(file.filename.split('/'));
           if(file.mimeType.includes('image/')) {
             return (
-              <img loading="lazy" key={file.fileId} src={file.url} alt={name} title={name} style={{width: file.metadata.width}} />
+              <img loading="lazy" key={file.fileId} src={file.url} alt={name} title={name} style={{width: file.metadata.width, aspectRatio: file.metadata.width/file.metadata.height}} />
             )
           } else {
             return (

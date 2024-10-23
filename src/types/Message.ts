@@ -25,6 +25,7 @@ export interface MessageFile {
   fileId: string,
   metadata: {
     width: number
+    height: number
   }
 }
 
