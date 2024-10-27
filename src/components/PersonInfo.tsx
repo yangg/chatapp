@@ -18,7 +18,8 @@ const PersonInfo = ({personInfo}) => {
     if(!personInfo) {
       return ''
     }
-    const {data} = await axios.get('/sleekflow/user/' + personInfo.userIdentityId)
+    setRemark('')
+    const {data} = await axios.get('/sleekflow/contact/' + personInfo.userIdentityId)
     setRemark(data?.remark || '')
     setSavedRemark(data?.remark || '')
   }, [personInfo?.userIdentityId]);
@@ -28,7 +29,7 @@ const PersonInfo = ({personInfo}) => {
     if(current === savedRemark) {
       return
     }
-    const { data } = await axios.post('/sleekflow/user',
+    const { data } = await axios.post('/sleekflow/contact',
     {
       id: personInfo.userIdentityId,
       remark: current

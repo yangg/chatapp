@@ -48,7 +48,7 @@ const ChatInput = ({conversation}: { conversation: Conversation}) => {
           <Button variant={'outline'} size={'icon'} className={'relative'} >
             <input type='file' className={'absolute inset-0 opacity-0'}
                    multiple
-                   accept={'.png,.jpg,.mp3,.mp4,.pdf'}
+                   accept={'.png,.jpg,.mp3,.pdf'}
                    onChange={(e) => {
                      setFiles(x => [...x, ...(e.target.files || [])])
                      // e.target.value = ''
