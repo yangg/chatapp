@@ -1,13 +1,19 @@
 import {atom, AtomGetters} from "@zedux/react";
 
-export const selectedConversationTypeIdState = atom('selectedConversationType', "General")
 
-export const conversationTypesState = atom('conversationTypes', [{
+const defaultConversationTypes = [
+    {
   title: 'General'
-},{
-  title: 'File Message',
-  getData: 'https://n8n.a4apple.cn/webhook/sleekflow-file',
-}])
+},
+  {
+    title: 'File Message',
+    // getData: 'https://n8n.a4apple.cn/webhook/sleekflow-file',
+    getData: 'https://dsp-file-dev.a4apple.cn:64403/api/irmsdev2/chatWidget/filecontacts'
+  }]
+
+export const selectedConversationTypeIdState = atom('selectedConversationType', defaultConversationTypes[0].title)
+
+export const conversationTypesState = atom('conversationTypes', defaultConversationTypes)
 
 
 export const getSelectedConversationType = ({get}: AtomGetters) => {

@@ -5,10 +5,14 @@ import './index.css'
 
 let appRoot: Root
 
-export function render(root: HTMLElement) {
+interface ChatAppOptions {
+  conversations?: []
+}
+
+export function render(root: HTMLElement, options: ChatAppOptions = {}) {
   appRoot = createRoot(root)
   appRoot.render(
-    <App />
+    <App types={options.conversations} />
   )
 }
 

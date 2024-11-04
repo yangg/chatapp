@@ -2,18 +2,16 @@
 import './App.css'
 import ChatWin from './components/ChatWin'
 import './lib/axios';
-import {useEffect} from "react";
 import {useAtomInstance} from "@zedux/react";
-import {conversationTypesState} from "@/atoms/conversationTypes.ts";
+import {conversationTypesState, selectedConversationTypeIdState} from "@/atoms/conversationTypes.ts";
 
-function App() {
+function App({types}) {
   const conversationTypes = useAtomInstance(conversationTypesState)
-  useEffect(() => {
-    // conversationTypes.setState(prevState => [...prevState, {
-    //   title: 'File Message',
-    //   getData: 1,
-    // }])
-  }, []);
+  const selectedConversationTypeId = useAtomInstance(selectedConversationTypeIdState)
+  if(types) {
+    selectedConversationTypeId.setState(types[0].title)
+    conversationTypes.setState(types)
+  }
   return (
     <>
       {/* <DemoApp/> */}

@@ -31,7 +31,7 @@ function ChatWin() {
     function onConversation({ unreadCount, list }: { unreadCount: number, list: Conversation[] } ) {
       console.log('conv', list)
       if(!selectedConversation.tabs) {
-        prependConversation(list)
+        prependConversation(list.filter(x => !x.fileNo))
       } else {
         mergeConversationToContacts(list)
       }

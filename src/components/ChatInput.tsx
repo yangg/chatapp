@@ -53,7 +53,7 @@ const ChatInput = ({conversation}: { conversation: Conversation}) => {
                      setFiles(x => [...x, ...(e.target.files || [])])
                      // e.target.value = ''
                    }}/>
-            <Paperclip/>
+            <Paperclip className={'size-5'}/>
           </Button>
           {conversation.channel !== 'web' && <TemplateList/>}
           <Button onClick={onSendMessage} disabled={!isSendable}>

@@ -64,7 +64,7 @@ const ChatMessage: React.FC = ({id}: {id: string}) => {
     updateId = true
     clearMessage()
     setHasMore(true);
-    if(id !== '0') {
+    if(!id.startsWith('NEWCONV:')) {
       (async () => {
         await doFetch();
         selectedConversation.unreadCount && setRead(selectedConversationId)
@@ -89,7 +89,7 @@ const ChatMessage: React.FC = ({id}: {id: string}) => {
     doFetch(messages.length ? {endTimestamp: messages[messages.length - 1].timestamp} : {});
   }, [messages, doFetch]);
 
-  const showWarnTemplate = selectedConversation.lastContactFromCustomers && (Date.now() - new Date(selectedConversation.lastContactFromCustomers) >= 24*3600*1000)
+  const showWarnTemplate = selectedConversation.lastContactFromCustomers ? (Date.now() - new Date(selectedConversation.lastContactFromCustomers) >= 24*3600*1000) : selectedConversation.conversationId.startsWith('NEWCONV:')
 
 
   // console.log('M rerender', id, messages.length)
@@ -100,7 +100,7 @@ const ChatMessage: React.FC = ({id}: {id: string}) => {
           <AlarmClock className="h-4 w-4" />
           <AlertTitle>Warning</AlertTitle>
           <AlertDescription>
-            Use Whatsapp template to send your frst message after the 24-hour conversation window
+            Use Whatsapp template to send your first message after the 24-hour conversation window
           </AlertDescription>
         </Alert>}
         <div className="flex-1"></div>
